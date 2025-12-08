@@ -3,9 +3,11 @@ import type { AppProps } from 'next/app';
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 
 export default function App({ Component, pageProps }: AppProps) {
     const [user, setUser] = useState<any>(null);
+    const router = useRouter();
 
     useEffect(() => {
         supabase.auth.getUser().then(({ data }) => setUser(data.user));
@@ -21,6 +23,7 @@ export default function App({ Component, pageProps }: AppProps) {
     async function logout() {
         await supabase.auth.signOut();
         setUser(null);
+        await router.push('/');
     }
 
     return (
@@ -56,4 +59,3 @@ export default function App({ Component, pageProps }: AppProps) {
         </div>
     );
 }
-
