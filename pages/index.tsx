@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabaseClient';
 import CardGrid from '../components/CardGrid';
 
 // Update: Accept the `user` prop
-export default function Home({ user }: { user: any }) {
+export default function Home({ user, mode, setMode }: { user: any, mode: 'view' | 'delete' | 'edit', setMode: (mode: 'view' | 'delete' | 'edit' ) => void }) {
     const [cards, setCards] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -58,7 +58,12 @@ export default function Home({ user }: { user: any }) {
             {cards.length === 0 ? (
                 <p>Your collection is empty! Go to "Add card" to begin.</p>
             ) : (
-                <CardGrid initialCards={cards} />
+                <CardGrid
+                    initialCards={cards}
+                    mode={mode}
+                    setMode={setMode}
+                    setCards={setCards} // Pass setCards to allow CardGrid to update the list
+                />
             )}
         </>
     );

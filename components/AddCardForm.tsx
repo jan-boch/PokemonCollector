@@ -19,7 +19,6 @@ export default function AddCardForm() {
         return filePath;
     }
 
-
     async function onSubmit(e: React.FormEvent) {
         e.preventDefault();
         setLoading(true);
@@ -44,7 +43,6 @@ export default function AddCardForm() {
             setLoading(false);
         }
     }
-
 
     return (
         <form onSubmit={onSubmit} style={{ display: 'grid', gap: 8 }}>
