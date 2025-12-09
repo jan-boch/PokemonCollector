@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useRouter } from 'next/router';
 
@@ -29,6 +29,13 @@ export default function UpdateCardForm({ initialData }: { initialData: any }) {
         e.preventDefault();
         setLoading(true);
         try {
+            const normalizedPriceString = price.replace(',', '.');
+
+            // Check if the resulting string is a valid number before converting
+            const finalPrice = normalizedPriceString && !isNaN(Number(normalizedPriceString))
+                ? Number(normalizedPriceString)
+                : null;
+
             let image_path = initialData.image_path;
             if (file) {
                 // Only upload if a new file is selected
@@ -40,14 +47,14 @@ export default function UpdateCardForm({ initialData }: { initialData: any }) {
                 .update({
                     name,
                     set_name: setNameVal,
-                    price: price ? Number(price) : null,
+                    price: finalPrice,
                     image_path,
                 })
                 .eq('id', initialData.id); // Crucial: identify the card to update
 
             if (error) throw error;
             alert('Card updated successfully!');
-            router.push('/'); // Redirect back to the collection page
+            await router.push('/'); // Redirect back to the collection page
         } catch (err: any) {
             alert(err.message || JSON.stringify(err));
         } finally {
@@ -57,9 +64,9 @@ export default function UpdateCardForm({ initialData }: { initialData: any }) {
 
     return (
         <form onSubmit={onSubmit} style={{ display: 'grid', gap: 8 }}>
-            <input value={name} onChange={e => setName(e.target.value)} placeholder="Card name" required />
-            <input value={setNameVal} onChange={e => setSetNameVal(e.target.value)} placeholder="Set name (optional)" />
-            <input type="number" value={price} onChange={e => setPrice(e.target.value)} placeholder="Price (e.g. 12.50)" />
+            <input value={name} onChange={e => setName(e.target.value)} placeholder="Card name" required maxLength={24} />
+            <input value={setNameVal} onChange={e => setSetNameVal(e.target.value)} placeholder="Set name (optional)" maxLength={35} />
+            <input type="number" value={price} onChange={e => setPrice(e.target.value)} placeholder="Price (e.g. 12,50 or 12.50)" />
             {initialData.image_path && <p>Current image: {initialData.image_path}</p>}
             <input type="file" accept="image/*" onChange={e => setFile(e.target.files?.[0] ?? null)} />
             <button disabled={loading} type="submit">Save Changes</button>

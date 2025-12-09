@@ -47,7 +47,7 @@ export default function CardGrid({ initialCards, mode, setMode, setCards }: Card
     }
 
     return (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(200px,1fr))', gap: 16 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))', gap: 16 }}>
             {cards.map(card => (
                 <CardItem
                     key={card.id}

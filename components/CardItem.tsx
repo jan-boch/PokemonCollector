@@ -8,6 +8,24 @@ interface CardItemProps {
     onDelete: (id: string) => void; // New prop
 }
 
+// Function to format the price
+function formatPrice(price: number | null): string {
+    if (price === null || price === undefined) {
+        return '-';
+    }
+
+    // Use Intl.NumberFormat for currency formatting
+    // 'de-DE' locale is a common European locale that uses comma (,) for decimals
+    // 'EUR' is the currency code
+    return new Intl.NumberFormat('de-DE', {
+        style: 'currency',
+        currency: 'EUR',
+        // This ensures two decimal places (e.g., 7,00 €)
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    }).format(price);
+}
+
 export default function CardItem({ card, onUpdate, mode, onDelete }: CardItemProps) {
     const imageUrl = card.image_path ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/card-images/${card.image_path}` : null;
 
@@ -80,11 +98,25 @@ export default function CardItem({ card, onUpdate, mode, onDelete }: CardItemPro
             )}
 
             <div style={{ minHeight: 140, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                {imageUrl ? <img src={imageUrl} alt={card.name} style={{ maxHeight: 140, width: 'auto' }} /> : <div>No image</div>}
+            {imageUrl ? (
+                <img
+                    src={imageUrl}
+                    alt={card.name}
+                    style={{
+                        maxWidth: '100%',     // Crucial: Image won't be wider than the card
+                        maxHeight: 230,        // Max height constraint
+                        height: 'auto',        // Maintain aspect ratio
+                        width: 'auto',         // Maintain aspect ratio
+                        objectFit: 'contain'   // Ensures the whole image is visible
+                    }}
+                />
+            ) : (
+                <div>No image</div>
+            )}
             </div>
             <h3>{card.name}</h3>
             <div>{card.set_name}</div>
-            <div>Price: {card.price ? `${card.price} €` : '-'}</div>
+            <div>Price: {formatPrice(card.price)}</div>
             <label style={{ display: 'block', marginTop: 8 }}>
                 {/* Collected checkbox should only be editable in 'view' or 'edit' mode */}
                 <input
