@@ -1,4 +1,10 @@
-html,body,#__next{height:100%}
-body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial;margin:0}
-.container{max-width:1200px;margin:0 auto}
-input,button{padding:8px;font-size:14px}
+/* styles/globals.css */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*html,body,#__next{height:100%}*/
+/*body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial;margin:0}*/
+/*.container{max-width:1200px;margin:0 auto}*/
+/*input,button{padding:8px;font-size:14px}*/
