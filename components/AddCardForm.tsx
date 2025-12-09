@@ -6,6 +6,7 @@ export default function AddCardForm() {
     const [name, setName] = useState('');
     const [setNameVal, setSetNameVal] = useState('');
     const [price, setPrice] = useState('');
+    const [cardmarketUrl, setCardmarketUrl] = useState('');
     const [file, setFile] = useState<File | null>(null);
     const [loading, setLoading] = useState(false);
 
@@ -40,6 +41,7 @@ export default function AddCardForm() {
                 name,
                 set_name: setNameVal,
                 price: finalPrice,
+                cardmarket_url: cardmarketUrl || null,
                 image_path,
             }]).select().single();
             if (error) throw error;
@@ -58,6 +60,7 @@ export default function AddCardForm() {
             <input value={name} onChange={e => setName(e.target.value)} placeholder="Card name" required maxLength={24} />
             <input value={setNameVal} onChange={e => setSetNameVal(e.target.value)} placeholder="Set name (optional)" maxLength={35} />
             <input value={price} onChange={e => setPrice(e.target.value)} placeholder="Price (e.g. 12,50 or 12.50)" />
+            <input type="url" value={cardmarketUrl} onChange={e => setCardmarketUrl(e.target.value)} placeholder="Cardmarket URL (optional)"/>
             <input type="file" accept="image/*" onChange={e => setFile(e.target.files?.[0] ?? null)} />
             <button disabled={loading} type="submit">Add card</button>
         </form>

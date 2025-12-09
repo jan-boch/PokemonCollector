@@ -28,6 +28,7 @@ function formatPrice(price: number | null): string {
 
 export default function CardItem({ card, onUpdate, mode, onDelete }: CardItemProps) {
     const imageUrl = card.image_path ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/card-images/${card.image_path}` : null;
+    const { cardmarket_url } = card;
 
     // ... (toggleCollected function remains the same)
     async function toggleCollected() {
@@ -40,6 +41,21 @@ export default function CardItem({ card, onUpdate, mode, onDelete }: CardItemPro
         if (error) return alert(error.message);
         onUpdate(data);
     }
+
+    // Image element definition
+    const ImageElement = imageUrl ? (
+        <img src={imageUrl} alt={card.name} style=
+            {{
+                maxWidth: '100%',
+                maxHeight: 230,
+                height: 'auto',
+                width: 'auto',
+                objectFit: 'contain'
+            }}
+        />
+    ) : (
+        <div>No image</div>
+    );
 
     return (
         <div style={{ border: '1px solid #ddd', padding: 12, borderRadius: 8, position: 'relative' }}>
@@ -79,9 +95,6 @@ export default function CardItem({ card, onUpdate, mode, onDelete }: CardItemPro
                         position: 'absolute',
                         top: 5,
                         right: 5,
-                        background: 'yellow',
-                        border: '1px solid #333',
-                        borderRadius: '50%',
                         width: 20,
                         height: 20,
                         display: 'flex',
@@ -89,7 +102,9 @@ export default function CardItem({ card, onUpdate, mode, onDelete }: CardItemPro
                         justifyContent: 'center',
                         cursor: 'pointer',
                         padding: 0,
-                        zIndex: 10
+                        zIndex: 10,
+                        color: 'inherit',
+                        textDecoration: 'none'
                     }}
                     title={`Edit ${card.name}`}
                 >
@@ -98,21 +113,13 @@ export default function CardItem({ card, onUpdate, mode, onDelete }: CardItemPro
             )}
 
             <div style={{ minHeight: 140, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            {imageUrl ? (
-                <img
-                    src={imageUrl}
-                    alt={card.name}
-                    style={{
-                        maxWidth: '100%',     // Crucial: Image won't be wider than the card
-                        maxHeight: 230,        // Max height constraint
-                        height: 'auto',        // Maintain aspect ratio
-                        width: 'auto',         // Maintain aspect ratio
-                        objectFit: 'contain'   // Ensures the whole image is visible
-                    }}
-                />
-            ) : (
-                <div>No image</div>
-            )}
+                {cardmarket_url ? (
+                    <a href={cardmarket_url} target="_blank" rel="noopener noreferrer" style={{ cursor: 'pointer' }}>
+                        {ImageElement}
+                    </a>
+                ) : (
+                    ImageElement
+                )}
             </div>
             <h3>{card.name}</h3>
             <div>{card.set_name}</div>

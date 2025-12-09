@@ -6,6 +6,7 @@ export default function UpdateCardForm({ initialData }: { initialData: any }) {
     const [name, setName] = useState(initialData.name);
     const [setNameVal, setSetNameVal] = useState(initialData.set_name || '');
     const [price, setPrice] = useState(initialData.price ? String(initialData.price) : '');
+    const [cardmarketUrl, setCardmarketUrl] = useState(initialData.cardmarket_url || '');
     const [file, setFile] = useState<File | null>(null);
     const [loading, setLoading] = useState(false);
     const router = useRouter();
@@ -48,6 +49,7 @@ export default function UpdateCardForm({ initialData }: { initialData: any }) {
                     name,
                     set_name: setNameVal,
                     price: finalPrice,
+                    cardmarket_url: cardmarketUrl || null,
                     image_path,
                 })
                 .eq('id', initialData.id); // Crucial: identify the card to update
@@ -67,6 +69,7 @@ export default function UpdateCardForm({ initialData }: { initialData: any }) {
             <input value={name} onChange={e => setName(e.target.value)} placeholder="Card name" required maxLength={24} />
             <input value={setNameVal} onChange={e => setSetNameVal(e.target.value)} placeholder="Set name (optional)" maxLength={35} />
             <input type="number" value={price} onChange={e => setPrice(e.target.value)} placeholder="Price (e.g. 12,50 or 12.50)" />
+            <input type="url" value={cardmarketUrl} onChange={e => setCardmarketUrl(e.target.value)} placeholder="Cardmarket URL (optional)"/>
             {initialData.image_path && <p>Current image: {initialData.image_path}</p>}
             <input type="file" accept="image/*" onChange={e => setFile(e.target.files?.[0] ?? null)} />
             <button disabled={loading} type="submit">Save Changes</button>

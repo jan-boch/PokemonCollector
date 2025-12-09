@@ -38,11 +38,27 @@ export default function App({ Component, pageProps }: AppProps) {
     return (
         <div className="container">
             <header style={{ display: 'flex', justifyContent: 'space-between', padding: '1rem' }}>
-                <h1><Link href="/">Pokémon Collection</Link></h1>
+                <h1>
+                    <Link
+                        href="/"
+                        style={{
+                            color: 'inherit',
+                            textDecoration: 'none'
+                        }}>
+                        Pokémon Collection
+                    </Link>
+                </h1>
                 <nav style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
                     {user ? (
                         <>
-                            <Link href="/add">Add card</Link>
+                            <Link
+                                href="/add"
+                                style={{
+                                    color: 'blue',
+                                    textDecoration: 'none'
+                                }}>
+                                Add card
+                            </Link>
                             {' | '}
                             {/* New Mode Buttons */}
                             <button onClick={() => setModeHandler('edit')}
@@ -52,7 +68,7 @@ export default function App({ Component, pageProps }: AppProps) {
                                     background: 'none',
                                     border: 'none',
                                     color: 'blue',
-                                    textDecoration: 'underline'
+                                    textDecoration: 'none'
                             }}>
                                 Edit
                             </button>
@@ -64,7 +80,7 @@ export default function App({ Component, pageProps }: AppProps) {
                                     background: 'none',
                                     border: 'none',
                                     color: 'blue',
-                                    textDecoration: 'underline'
+                                    textDecoration: 'none'
                             }}>
                                 Delete
                             </button>
@@ -75,7 +91,7 @@ export default function App({ Component, pageProps }: AppProps) {
                                     background: 'none',
                                     border: 'none',
                                     color: 'blue',
-                                    textDecoration: 'underline'
+                                    textDecoration: 'none'
                                 }}>
                                 Logout
                             </button>
