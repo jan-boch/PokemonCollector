@@ -1,8 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useRouter } from 'next/router';
 
-export default function UpdateCardForm({ initialData }: { initialData: any }) {
+interface List {
+    id: string;
+    name: string;
+}
+
+export default function UpdateCardForm({ initialData, user, lists }: { initialData: any, user: any, lists: List[] }) {
     const [name, setName] = useState(initialData.name);
     const [setNameVal, setSetNameVal] = useState(initialData.set_name || '');
     const [price, setPrice] = useState(initialData.price ? String(initialData.price) : '');
@@ -11,10 +16,24 @@ export default function UpdateCardForm({ initialData }: { initialData: any }) {
     const [loading, setLoading] = useState(false);
     const router = useRouter();
 
-    // Note: The uploadImage function remains the same as in AddCardForm
+    const [selectedList, setSelectedList] = useState('');
+
+    useEffect(() => {
+        if (lists.length > 0 && initialData.list_id) {
+            const currentList = lists.find(list => list.id === initialData.list_id);
+            if (currentList) {
+                setSelectedList(currentList.name);
+            } else {
+                // Fallback if the initial list_id doesn't match any fetched list (e.g., deleted list)
+                setSelectedList(lists[0].name);
+            }
+        } else if (lists.length > 0) {
+            setSelectedList(lists[0].name);
+        }
+    }, [lists, initialData.list_id]);
 
     async function uploadImage(fileName: string, file: File) {
-        const filePath = `${Date.now()}_${fileName}`;
+        const filePath = `${user.id}/${Date.now()}_${fileName}`;
         // Delete old image if it exists before uploading a new one, for cleanup
         if (initialData.image_path) {
             await supabase.storage.from('card-images').remove([initialData.image_path]);
@@ -28,21 +47,27 @@ export default function UpdateCardForm({ initialData }: { initialData: any }) {
 
     async function onSubmit(e: React.FormEvent) {
         e.preventDefault();
+        console.log('Update form submission started');
         setLoading(true);
         try {
             const normalizedPriceString = price.replace(',', '.');
 
-            // Check if the resulting string is a valid number before converting
             const finalPrice = normalizedPriceString && !isNaN(Number(normalizedPriceString))
                 ? Number(normalizedPriceString)
                 : null;
 
             let image_path = initialData.image_path;
             if (file) {
-                // Only upload if a new file is selected
+                console.log('Uploading new image...');
                 image_path = await uploadImage(file.name, file);
             }
 
+            const targetList = lists.find(list => list.name === selectedList);
+            if (!targetList) {
+                throw new Error('Selected list not found.');
+            }
+
+            console.log('Updating card in database...');
             const { error } = await supabase
                 .from('cards')
                 .update({
@@ -51,28 +76,101 @@ export default function UpdateCardForm({ initialData }: { initialData: any }) {
                     price: finalPrice,
                     cardmarket_url: cardmarketUrl || null,
                     image_path,
+                    list_id: targetList.id, // Update list_id
                 })
-                .eq('id', initialData.id); // Crucial: identify the card to update
+                .eq('id', initialData.id);
 
-            if (error) throw error;
+            if (error) {
+                console.error('Supabase update error:', error);
+                throw error;
+            }
+            
+            console.log('Card updated successfully');
             alert('Card updated successfully!');
-            await router.push('/'); // Redirect back to the collection page
+            router.push('/');
         } catch (err: any) {
+            console.error('Update error:', err);
             alert(err.message || JSON.stringify(err));
         } finally {
             setLoading(false);
+            console.log('Update form submission ended');
         }
     }
 
     return (
-        <form onSubmit={onSubmit} style={{ display: 'grid', gap: 8 }}>
-            <input value={name} onChange={e => setName(e.target.value)} placeholder="Card name" required maxLength={24} />
-            <input value={setNameVal} onChange={e => setSetNameVal(e.target.value)} placeholder="Set name (optional)" maxLength={35} />
-            <input type="number" value={price} onChange={e => setPrice(e.target.value)} placeholder="Price (e.g. 12,50 or 12.50)" />
-            <input type="url" value={cardmarketUrl} onChange={e => setCardmarketUrl(e.target.value)} placeholder="Cardmarket URL (optional)"/>
-            {initialData.image_path && <p>Current image: {initialData.image_path}</p>}
-            <input type="file" accept="image/*" onChange={e => setFile(e.target.files?.[0] ?? null)} />
-            <button disabled={loading} type="submit">Save Changes</button>
+        <form onSubmit={onSubmit} className="space-y-4 bg-white p-6 rounded-lg shadow-md">
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Card name</label>
+                <input 
+                    value={name} 
+                    onChange={e => setName(e.target.value)} 
+                    placeholder="Card name" 
+                    required 
+                    maxLength={24}
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                />
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Set name (optional)</label>
+                <input 
+                    value={setNameVal} 
+                    onChange={e => setSetNameVal(e.target.value)} 
+                    placeholder="Set name" 
+                    maxLength={35}
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                />
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Price</label>
+                <input 
+                    type="text" 
+                    value={price} 
+                    onChange={e => setPrice(e.target.value)} 
+                    placeholder="Price (e.g. 12,50)"
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                />
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Cardmarket URL (optional)</label>
+                <input 
+                    type="url" 
+                    value={cardmarketUrl} 
+                    onChange={e => setCardmarketUrl(e.target.value)} 
+                    placeholder="https://..."
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                />
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">List</label>
+                <select
+                    value={selectedList}
+                    onChange={e => setSelectedList(e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                >
+                    {lists.map(list => (
+                        <option key={list.id} value={list.name}>{list.name}</option>
+                    ))}
+                </select>
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Image</label>
+                {initialData.image_path && (
+                    <p className="text-xs text-gray-500 mb-2 truncate">Current: {initialData.image_path}</p>
+                )}
+                <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={e => setFile(e.target.files?.[0] ?? null)}
+                    className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                />
+            </div>
+            <button 
+                disabled={loading} 
+                type="submit"
+                className="w-full bg-blue-600 text-white py-2 px-4 rounded-full border border-blue-700 hover:bg-blue-700 disabled:bg-gray-400 transition-colors font-medium shadow-sm"
+            >
+                {loading ? 'Saving...' : 'Save Changes'}
+            </button>
         </form>
     );
 }

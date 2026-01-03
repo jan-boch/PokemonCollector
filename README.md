@@ -2,6 +2,10 @@ This is a Pokemon Tracker project
 
 ## Getting Started
 
+Always install dependencies with
+```npm install --save-optional --os=linux --cpu=x64```
+to make sure dependencies ally with vercel linux deployment
+
 First, run the development server:
 
 ```bash

@@ -1,70 +1,120 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import CardGrid from '../components/CardGrid';
+import { useRouter } from 'next/router';
 
 // Update: Accept the `user` prop
-export default function Home({ user, mode, setMode }: { user: any, mode: 'view' | 'delete' | 'edit', setMode: (mode: 'view' | 'delete' | 'edit' ) => void }) {
+export default function Home({ user, mode, setMode, activeList, lists, setLists }: { user: any, mode: 'view' | 'delete' | 'edit', setMode: (mode: 'view' | 'delete' | 'edit' ) => void, activeList: string, lists: any[], setLists: React.Dispatch<React.SetStateAction<string[]>> }) {
     const [cards, setCards] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const router = useRouter();
+    const prevActiveList = React.useRef(activeList);
 
     useEffect(() => {
-        async function loadCards() {
-            setLoading(true);
+        let isMounted = true;
+        async function loadData() {
+            console.log('[DEBUG] loadData', { 
+                user: user?.id, 
+                activeList, 
+                lists: lists.length,
+                prevList: prevActiveList.current
+            });
 
-            // 1. Fetch data only if a user is logged in
-            if (user) {
-                // NOTE: You should adjust this query to only fetch cards
-                // belonging to the logged-in user (e.g., .eq('user_id', user.id)).
-                // For now, we'll keep the general fetch but ensure it only runs when 'user' is present.
-                const { data, error } = await supabase
-                    .from('cards')
-                    .select('*')
-                    .order('created_at', { ascending: false });
-
-                if (error) console.error(error);
-                setCards(data ?? []);
-            } else {
-                // Clear cards if the user logs out
-                setCards([]);
+            if (!user || !activeList || lists.length === 0) {
+                console.log('[DEBUG] skipping loadData - missing dependencies');
+                if (isMounted) {
+                    setCards([]);
+                    setLoading(false);
+                }
+                return;
             }
-            setLoading(false);
+
+            // Only show full loading if the list has actually changed
+            if (prevActiveList.current !== activeList || cards.length === 0) {
+                if (isMounted) setLoading(true);
+            }
+            
+            try {
+                const activeListData = lists.find(list => list.name === activeList);
+
+                if (activeListData) {
+                    const { data, error } = await supabase
+                        .from('cards')
+                        .select('*')
+                        .eq('list_id', activeListData.id)
+                        .order('created_at', { ascending: false });
+
+                    if (error) {
+                        console.error('Supabase fetch error:', error);
+                        if (isMounted) setCards([]);
+                    } else {
+                        if (isMounted) setCards(data ?? []);
+                    }
+                } else {
+                    console.warn('Active list not found in lists:', activeList);
+                    if (isMounted) setCards([]);
+                }
+            } catch (err) {
+                console.error('Unexpected error in loadData:', err);
+                if (isMounted) setCards([]);
+            } finally {
+                if (isMounted) {
+                    setLoading(false);
+                    prevActiveList.current = activeList;
+                    console.log('[DEBUG] loadData finished');
+                }
+            }
         }
 
-        // Dependency array includes 'user' so the effect re-runs on login/logout
-        loadCards();
-    }, [user]);
+        loadData();
+        return () => { isMounted = false; };
+    }, [user?.id, activeList, lists]);
 
-    // 2. Display a welcome message if no user is logged in
     if (!user) {
         return (
-            <div style={{ textAlign: 'center', padding: '50px' }}>
-                <h2>Welcome to Your Pokémon Card Tracker!</h2>
-                <p>
+            <div className="text-center p-12 bg-white rounded-lg shadow-md">
+                <h2 className="text-3xl font-bold mb-4">Welcome to Your Pokémon Card Tracker!</h2>
+                <p className="text-lg text-gray-600 mb-2">
                     Log in to start managing and viewing your personal collection.
                 </p>
-                <p>
-                    You can sign in using the **Login** link in the header.
+                <p className="text-gray-500">
+                    You can sign in using the <strong>Login</strong> link in the header.
                 </p>
             </div>
         );
     }
 
-    // 3. Display loading state while logged-in user's cards are being fetched
-    if (loading) return <p>Loading your collection...</p>;
+    if (loading) {
+        return (
+            <div className="flex flex-col items-center justify-center py-20">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+                <p className="text-gray-500 font-medium">Loading your collection...</p>
+            </div>
+        );
+    }
 
-    // 4. Display the card grid for logged-in users
     return (
-        <>
+        <div className="py-6">
             {cards.length === 0 ? (
-                <p>Your collection is empty! Go to "Add card" to begin.</p>
+                <div className="text-center py-20 bg-white rounded-xl shadow-sm border border-gray-100">
+                    <div className="text-5xl mb-4">🎴</div>
+                    <h3 className="text-xl font-semibold text-gray-800 mb-2">Your collection is empty</h3>
+                    <p className="text-gray-500 mb-6">Start adding your favorite Pokémon cards to track them!</p>
+                    <button 
+                        onClick={() => router.push('/add')}
+                        className="inline-flex items-center px-6 py-3 rounded-full bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors font-medium shadow-md"
+                    >
+                        Add Your First Card
+                    </button>
+                </div>
             ) : (
                 <CardGrid
                     initialCards={cards}
                     mode={mode}
                     setMode={setMode}
-                    setCards={setCards} // Pass setCards to allow CardGrid to update the list
+                    setCards={setCards}
                 />
             )}
-        </>
+        </div>
     );
 }
