@@ -1,7 +1,7 @@
 import AddCardForm from '../components/AddCardForm';
 import { useRouter } from 'next/router';
 
-export default function AddPage({ user, lists, activeList }: { user: any, lists: any[], activeList: string }) {
+export default function AddPage({ user, lists, activeList }: { user: any, lists: { id: string, name: string }[], activeList: string }) {
     const router = useRouter();
     if (!user) return <p className="text-center text-gray-500 mt-10">Please log in first</p>;
 

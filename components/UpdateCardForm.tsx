@@ -47,6 +47,7 @@ export default function UpdateCardForm({ initialData, user, lists }: { initialDa
 
     async function onSubmit(e: React.FormEvent) {
         e.preventDefault();
+        console.log('Update form submission started');
         setLoading(true);
         try {
             const normalizedPriceString = price.replace(',', '.');
@@ -57,6 +58,7 @@ export default function UpdateCardForm({ initialData, user, lists }: { initialDa
 
             let image_path = initialData.image_path;
             if (file) {
+                console.log('Uploading new image...');
                 image_path = await uploadImage(file.name, file);
             }
 
@@ -65,6 +67,7 @@ export default function UpdateCardForm({ initialData, user, lists }: { initialDa
                 throw new Error('Selected list not found.');
             }
 
+            console.log('Updating card in database...');
             const { error } = await supabase
                 .from('cards')
                 .update({
@@ -77,13 +80,20 @@ export default function UpdateCardForm({ initialData, user, lists }: { initialDa
                 })
                 .eq('id', initialData.id);
 
-            if (error) throw error;
+            if (error) {
+                console.error('Supabase update error:', error);
+                throw error;
+            }
+            
+            console.log('Card updated successfully');
             alert('Card updated successfully!');
-            await router.push('/');
+            router.push('/');
         } catch (err: any) {
+            console.error('Update error:', err);
             alert(err.message || JSON.stringify(err));
         } finally {
             setLoading(false);
+            console.log('Update form submission ended');
         }
     }
 

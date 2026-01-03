@@ -9,56 +9,61 @@ import CardLists from '../components/CardLists';
 export default function App({ Component, pageProps }: AppProps) {
     const [user, setUser] = useState<any>(null);
     const [mode, setMode] = useState<'view' | 'delete' | 'edit'>('view');
-    const [lists, setLists] = useState(['base']);
-    const [activeList, setActiveList] = useState('base');
+    const [lists, setLists] = useState<any[]>([]);
+    const [activeList, setActiveList] = useState<string>('');
     const router = useRouter();
 
     useEffect(() => {
         const handleAuthStateChange = async (event: any, session: any) => {
             const currentUser = session?.user ?? null;
-            setUser(currentUser);
-
-            if (currentUser) {
-                const { data: fetchedLists, error } = await supabase
-                    .from('lists')
-                    .select('id, name')
-                    .eq('user_id', currentUser.id);
-
-                if (error) {
-                    console.error('Error fetching lists:', error);
-                    setLists([]);
-                    setActiveList('');
-                    return;
-                }
-
-                const listNames = fetchedLists?.map(list => list.name) || [];
-                setLists(listNames);
-
-                if (listNames.length === 0) {
-                    const { data: newlist, error: insertError } = await supabase
-                        .from('lists')
-                        .insert([{ name: 'Base', user_id: currentUser.id }])
-                        .select()
-                        .single();
-
-                    if (insertError) {
-                        console.error('Error creating base list:', insertError);
-                        setLists([]);
-                        setActiveList('');
-                    } else {
-                        setLists(['Base']);
-                        setActiveList('Base');
-                    }
-                } else {
-                    if (listNames.includes('Base')) {
-                        setActiveList('Base');
-                    } else {
-                        setActiveList(listNames[0]);
-                    }
-                }
-            } else {
+            
+            if (!currentUser) {
+                setUser(null);
                 setLists([]);
                 setActiveList('');
+                return;
+            }
+
+            // Only update user if it actually changed (by ID) to avoid unnecessary re-renders
+            setUser((prevUser: any) => {
+                if (prevUser?.id === currentUser.id) return prevUser;
+                return currentUser;
+            });
+
+            const { data: fetchedLists, error } = await supabase
+                .from('lists')
+                .select('id, name')
+                .eq('user_id', currentUser.id);
+
+            if (error) {
+                console.error('Error fetching lists:', error);
+                return;
+            }
+
+            if (fetchedLists && fetchedLists.length > 0) {
+                setLists(fetchedLists);
+                
+                setActiveList(current => {
+                    // If we already have a valid active list, keep it
+                    if (current && fetchedLists.some(l => l.name === current)) {
+                        return current;
+                    }
+                    // Otherwise, try to find 'Base' or use the first one
+                    const hasBase = fetchedLists.some(l => l.name === 'Base');
+                    return hasBase ? 'Base' : fetchedLists[0].name;
+                });
+            } else {
+                // Create Base list if none exist
+                const { data: newList, error: insertError } = await supabase
+                    .from('lists')
+                    .insert([{ name: 'Base', user_id: currentUser.id }])
+                    .select()
+                    .single();
+
+                if (!insertError && newList) {
+                    setLists([newList]);
+                    setActiveList('Base');
+                }
             }
         };
 

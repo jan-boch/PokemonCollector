@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import { useRouter } from 'next/router';
 
-export default function AddCardForm({ user, lists, activeList }: { user: any, lists: any[], activeList: string }) {
+export default function AddCardForm({ user, lists, activeList }: { user: any, lists: { id: string, name: string }[], activeList: string }) {
     const [name, setName] = useState('');
     const [setNameVal, setSetNameVal] = useState('');
     const [price, setPrice] = useState('');
@@ -9,6 +10,7 @@ export default function AddCardForm({ user, lists, activeList }: { user: any, li
     const [file, setFile] = useState<File | null>(null);
     const [loading, setLoading] = useState(false);
     const [selectedList, setSelectedList] = useState(activeList);
+    const router = useRouter();
 
     async function uploadImage(fileName: string, file: File) {
         const filePath = `${user.id}/${Date.now()}_${fileName}`;
@@ -21,10 +23,12 @@ export default function AddCardForm({ user, lists, activeList }: { user: any, li
 
     async function onSubmit(e: React.FormEvent) {
         e.preventDefault();
+        console.log('Form submission started');
         setLoading(true);
         try {
             let image_path = null;
             if (file) {
+                console.log('Uploading image...');
                 image_path = await uploadImage(file.name, file);
             }
 
@@ -33,33 +37,37 @@ export default function AddCardForm({ user, lists, activeList }: { user: any, li
                 ? Number(normalizedPriceString)
                 : null;
 
-            const { data: listData, error: listError } = await supabase
-                .from('lists')
-                .select('id')
-                .eq('name', selectedList)
-                .eq('user_id', user.id)
-                .single();
-
-            if (listError || !listData) {
+            const targetList = lists.find(l => l.name === selectedList);
+            if (!targetList) {
                 throw new Error('Could not find the selected list.');
             }
 
+            console.log('Inserting card into database...');
             const { error } = await supabase.from('cards').insert([{
                 name,
                 set_name: setNameVal,
                 price: finalPrice,
                 cardmarket_url: cardmarketUrl || null,
                 image_path,
-                list_id: listData.id,
+                list_id: targetList.id,
                 user_id: user.id,
-            }]).select().single();
-            if (error) throw error;
+            }]).select();
+            
+            if (error) {
+                console.error('Supabase error:', error);
+                throw error;
+            }
+            
+            console.log('Card added successfully');
             alert('Card added');
             setName(''); setSetNameVal(''); setPrice(''); setFile(null);
+            router.push('/');
         } catch (err: any) {
+            console.error('Submission error:', err);
             alert(err.message || JSON.stringify(err));
         } finally {
             setLoading(false);
+            console.log('Form submission ended');
         }
     }
 
@@ -71,42 +79,42 @@ export default function AddCardForm({ user, lists, activeList }: { user: any, li
                 placeholder="Card name"
                 required
                 maxLength={24}
-                className="w-full p-2 border border-gray-300 rounded"
+                className="w-full p-2 border border-gray-300 rounded-lg"
             />
             <input
                 value={setNameVal}
                 onChange={e => setSetNameVal(e.target.value)}
                 placeholder="Set name (optional)"
                 maxLength={35}
-                className="w-full p-2 border border-gray-300 rounded"
+                className="w-full p-2 border border-gray-300 rounded-lg"
             />
             <input
                 value={price}
                 onChange={e => setPrice(e.target.value)}
                 placeholder="Price (e.g. 12,50 or 12.50)"
-                className="w-full p-2 border border-gray-300 rounded"
+                className="w-full p-2 border border-gray-300 rounded-lg"
             />
             <input
                 type="url"
                 value={cardmarketUrl}
                 onChange={e => setCardmarketUrl(e.target.value)}
                 placeholder="Cardmarket URL (optional)"
-                className="w-full p-2 border border-gray-300 rounded"
+                className="w-full p-2 border border-gray-300 rounded-lg"
             />
             <select
                 value={selectedList}
                 onChange={e => setSelectedList(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded"
+                className="w-full p-2 border border-gray-300 rounded-lg"
             >
                 {lists.map(list => (
-                    <option key={list} value={list}>{list}</option>
+                    <option key={list.id} value={list.name}>{list.name}</option>
                 ))}
             </select>
             <input
                 type="file"
                 accept="image/*"
                 onChange={e => setFile(e.target.files?.[0] ?? null)}
-                className="w-full p-2 border border-gray-300 rounded"
+                className="w-full p-2 border border-gray-300 rounded-lg"
             />
             <button
                 disabled={loading}

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import CardGrid from '../components/CardGrid';
 import { useRouter } from 'next/router';
@@ -8,48 +8,51 @@ export default function Home({ user, mode, setMode, activeList, lists, setLists 
     const [cards, setCards] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
+    const prevActiveList = React.useRef(activeList);
 
     useEffect(() => {
         async function loadData() {
-            setLoading(true);
-
-            if (user) {
-                const { data: listData, error: listError } = await supabase
-                    .from('lists')
-                    .select('id, name')
-                    .eq('user_id', user.id);
-
-                if (listError) {
-                    console.error('Error fetching lists:', listError);
-                } else if (listData) {
-                    setLists(listData.map(list => list.name));
-                    const activeListData = listData.find(list => list.name === activeList);
-
-                    if (activeListData) {
-                        const { data, error } = await supabase
-                            .from('cards')
-                            .select('*')
-                            .eq('list_id', activeListData.id)
-                            .order('created_at', { ascending: false });
-
-                        if (error) {
-                            console.error(error);
-                            setCards([]);
-                        } else {
-                            setCards(data ?? []);
-                        }
-                    } else {
-                        setCards([]);
-                    }
-                }
-            } else {
+            if (!user || !activeList || lists.length === 0) {
                 setCards([]);
+                setLoading(false);
+                return;
             }
-            setLoading(false);
+
+            // Only show full loading if the list has actually changed
+            if (prevActiveList.current !== activeList || cards.length === 0) {
+                setLoading(true);
+            }
+            
+            try {
+                const activeListData = lists.find(list => list.name === activeList);
+
+                if (activeListData) {
+                    const { data, error } = await supabase
+                        .from('cards')
+                        .select('*')
+                        .eq('list_id', activeListData.id)
+                        .order('created_at', { ascending: false });
+
+                    if (error) {
+                        console.error(error);
+                        setCards([]);
+                    } else {
+                        setCards(data ?? []);
+                    }
+                } else {
+                    setCards([]);
+                }
+            } catch (err) {
+                console.error('Error in loadData:', err);
+                setCards([]);
+            } finally {
+                setLoading(false);
+                prevActiveList.current = activeList;
+            }
         }
 
         loadData();
-    }, [user, activeList]);
+    }, [user?.id, activeList, lists]);
 
     if (!user) {
         return (

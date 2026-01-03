@@ -3,8 +3,8 @@ import { supabase } from '../lib/supabaseClient';
 
 interface CardListsProps {
     user: any;
-    lists: string[];
-    setLists: React.Dispatch<React.SetStateAction<string[]>>;
+    lists: { id: string, name: string }[];
+    setLists: React.Dispatch<React.SetStateAction<any[]>>;
     activeList: string;
     setActiveList: React.Dispatch<React.SetStateAction<string>>;
 }
@@ -16,7 +16,7 @@ export default function CardLists({ user, lists, setLists, activeList, setActive
         const newListName = prompt('Enter the name for the new list:');
         if (!newListName) return;
 
-        if (lists.includes(newListName)) {
+        if (lists.some(l => l.name === newListName)) {
             alert('A list with this name already exists.');
             return;
         }
@@ -34,7 +34,7 @@ export default function CardLists({ user, lists, setLists, activeList, setActive
             }
 
             // Update local state to include the new list and set it as active
-            setLists(prevLists => [...prevLists, newListName]);
+            setLists(prevLists => [...prevLists, data]);
             setActiveList(newListName);
         } catch (error: any) {
             alert('Error adding new list: ' + error.message);
@@ -49,16 +49,16 @@ export default function CardLists({ user, lists, setLists, activeList, setActive
             <div className="flex space-x-1">
                 {lists.map(list => (
                     <button
-                        key={list}
-                        onClick={() => setActiveList(list)}
+                        key={list.id}
+                        onClick={() => setActiveList(list.name)}
                         className={`px-6 py-3 text-sm font-medium transition-all relative ${
-                            activeList === list
+                            activeList === list.name
                                 ? 'text-blue-600'
                                 : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
                         }`}
                     >
-                        {list}
-                        {activeList === list && (
+                        {list.name}
+                        {activeList === list.name && (
                             <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />
                         )}
                     </button>

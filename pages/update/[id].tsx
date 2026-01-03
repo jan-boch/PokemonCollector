@@ -3,11 +3,10 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import UpdateCardForm from '../../components/UpdateCardForm'; // You will create this component
 
-export default function UpdatePage({ user }: any) {
+export default function UpdatePage({ user, lists }: any) {
     const router = useRouter();
     const { id } = router.query;
     const [cardData, setCardData] = useState<any>(null);
-    const [lists, setLists] = useState<any[]>([]); // State to hold fetched lists
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -33,19 +32,6 @@ export default function UpdatePage({ user }: any) {
                 } else {
                     setCardData(card);
                 }
-            }
-
-            // Fetch lists
-            const { data: fetchedLists, error: listsError } = await supabase
-                .from('lists')
-                .select('id, name')
-                .eq('user_id', user.id);
-
-            if (listsError) {
-                console.error('Error fetching lists:', listsError);
-                setLists([]);
-            } else {
-                setLists(fetchedLists || []);
             }
             setLoading(false);
         }
