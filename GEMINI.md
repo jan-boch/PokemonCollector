@@ -74,7 +74,8 @@ The project follows the standard Next.js project structure.
 
 ### Backend
 
-The application uses Supabase for its backend. The Supabase client is initialized in `lib/supabaseClient.ts`. All interactions with the database and storage are done through the Supabase client.
+The application uses Supabase for its backend. The Supabase client is initialized in `lib/supabaseClient.ts`.
+All interactions with the database and storage are done through the Supabase client.
 
 The database schema consists of a `cards` table with the following columns:
 - `id` (uuid, primary key)
@@ -103,3 +104,7 @@ The application's pages are located in the `pages` directory. The main pages are
 - `add.tsx`: The page for adding a new card.
 - `update/[id].tsx`: The page for updating a specific card.
 - `login.tsx`: The login page.
+
+### Deployment
+
+Project is deployed with vercel on the website with URL: https://pokemon-collector-six.vercel.app/
