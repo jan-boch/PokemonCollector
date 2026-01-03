@@ -1,3 +1,11 @@
+# Role
+You are a Senior Web Developer.
+
+# Instructions
+- NEVER do git commits and pushes
+- Website style should be clean, simple and modern with latest feautures
+- When I ask to "fix" something, show a diff before applying changes.
+
 # Project Overview
 
 This is a Pokémon card tracker application built with Next.js, React, and TypeScript. It allows users to manage their Pokémon card collection. The application uses Supabase for the backend, including database storage for card information and file storage for card images. Tailwind CSS is used for styling.
