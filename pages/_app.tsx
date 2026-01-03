@@ -1,6 +1,6 @@
 import '../styles/globals.css';
 import type { AppProps } from 'next/app';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -12,24 +12,32 @@ export default function App({ Component, pageProps }: AppProps) {
     const [lists, setLists] = useState<any[]>([]);
     const [activeList, setActiveList] = useState<string>('');
     const router = useRouter();
+    const lastUserId = useRef<string | null>(null);
 
     useEffect(() => {
         const handleAuthStateChange = async (event: any, session: any) => {
             const currentUser = session?.user ?? null;
             
             if (!currentUser) {
-                setUser(null);
-                setLists([]);
-                setActiveList('');
+                if (lastUserId.current !== null) {
+                    setUser(null);
+                    setLists([]);
+                    setActiveList('');
+                    lastUserId.current = null;
+                }
                 return;
             }
 
-            // Only update user if it actually changed (by ID) to avoid unnecessary re-renders
-            setUser((prevUser: any) => {
-                if (prevUser?.id === currentUser.id) return prevUser;
-                return currentUser;
-            });
+            // If it's the same user, just update the session data but don't re-fetch lists
+            if (lastUserId.current === currentUser.id) {
+                setUser(currentUser);
+                return;
+            }
 
+            lastUserId.current = currentUser.id;
+            setUser(currentUser);
+
+            console.log('User changed or initial login, fetching lists...');
             const { data: fetchedLists, error } = await supabase
                 .from('lists')
                 .select('id, name')
@@ -44,16 +52,13 @@ export default function App({ Component, pageProps }: AppProps) {
                 setLists(fetchedLists);
                 
                 setActiveList(current => {
-                    // If we already have a valid active list, keep it
                     if (current && fetchedLists.some(l => l.name === current)) {
                         return current;
                     }
-                    // Otherwise, try to find 'Base' or use the first one
                     const hasBase = fetchedLists.some(l => l.name === 'Base');
                     return hasBase ? 'Base' : fetchedLists[0].name;
                 });
             } else {
-                // Create Base list if none exist
                 const { data: newList, error: insertError } = await supabase
                     .from('lists')
                     .insert([{ name: 'Base', user_id: currentUser.id }])

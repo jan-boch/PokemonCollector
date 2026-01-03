@@ -11,16 +11,27 @@ export default function Home({ user, mode, setMode, activeList, lists, setLists 
     const prevActiveList = React.useRef(activeList);
 
     useEffect(() => {
+        let isMounted = true;
         async function loadData() {
+            console.log('[DEBUG] loadData', { 
+                user: user?.id, 
+                activeList, 
+                lists: lists.length,
+                prevList: prevActiveList.current
+            });
+
             if (!user || !activeList || lists.length === 0) {
-                setCards([]);
-                setLoading(false);
+                console.log('[DEBUG] skipping loadData - missing dependencies');
+                if (isMounted) {
+                    setCards([]);
+                    setLoading(false);
+                }
                 return;
             }
 
             // Only show full loading if the list has actually changed
             if (prevActiveList.current !== activeList || cards.length === 0) {
-                setLoading(true);
+                if (isMounted) setLoading(true);
             }
             
             try {
@@ -34,24 +45,29 @@ export default function Home({ user, mode, setMode, activeList, lists, setLists 
                         .order('created_at', { ascending: false });
 
                     if (error) {
-                        console.error(error);
-                        setCards([]);
+                        console.error('Supabase fetch error:', error);
+                        if (isMounted) setCards([]);
                     } else {
-                        setCards(data ?? []);
+                        if (isMounted) setCards(data ?? []);
                     }
                 } else {
-                    setCards([]);
+                    console.warn('Active list not found in lists:', activeList);
+                    if (isMounted) setCards([]);
                 }
             } catch (err) {
-                console.error('Error in loadData:', err);
-                setCards([]);
+                console.error('Unexpected error in loadData:', err);
+                if (isMounted) setCards([]);
             } finally {
-                setLoading(false);
-                prevActiveList.current = activeList;
+                if (isMounted) {
+                    setLoading(false);
+                    prevActiveList.current = activeList;
+                    console.log('[DEBUG] loadData finished');
+                }
             }
         }
 
         loadData();
+        return () => { isMounted = false; };
     }, [user?.id, activeList, lists]);
 
     if (!user) {
@@ -68,7 +84,14 @@ export default function Home({ user, mode, setMode, activeList, lists, setLists 
         );
     }
 
-    if (loading) return <p className="text-center text-gray-500">Loading your collection...</p>;
+    if (loading) {
+        return (
+            <div className="flex flex-col items-center justify-center py-20">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+                <p className="text-gray-500 font-medium">Loading your collection...</p>
+            </div>
+        );
+    }
 
     return (
         <div className="py-6">
