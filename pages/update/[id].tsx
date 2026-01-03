@@ -16,24 +16,40 @@ export default function UpdatePage({ user }: any) {
             return;
         }
 
-        if (id) {
-            async function fetchCard() {
-                const { data, error } = await supabase
+        async function fetchData() {
+            setLoading(true);
+            // Fetch card data
+            if (id) {
+                const { data: card, error: cardError } = await supabase
                     .from('cards')
                     .select('*')
                     .eq('id', id)
                     .single();
 
-                if (error) {
-                    alert('Error loading card: ' + error.message);
-                    console.error(error);
+                if (cardError) {
+                    alert('Error loading card: ' + cardError.message);
+                    console.error(cardError);
+                    setCardData(null);
                 } else {
-                    setCardData(data);
+                    setCardData(card);
                 }
-                setLoading(false);
             }
-            fetchCard();
+
+            // Fetch lists
+            const { data: fetchedLists, error: listsError } = await supabase
+                .from('lists')
+                .select('id, name')
+                .eq('user_id', user.id);
+
+            if (listsError) {
+                console.error('Error fetching lists:', listsError);
+                setLists([]);
+            } else {
+                setLists(fetchedLists || []);
+            }
+            setLoading(false);
         }
+        fetchData();
     }, [id, user, router]);
 
     if (!user) return null; // Wait for redirect
@@ -43,7 +59,7 @@ export default function UpdatePage({ user }: any) {
     return (
         <div style={{ maxWidth: 700 }}>
             <h2>Update Card: {cardData.name}</h2>
-            <UpdateCardForm initialData={cardData} />
+            <UpdateCardForm initialData={cardData} user={user} lists={lists} />
         </div>
     );
 }
