@@ -7,6 +7,7 @@ export default function UpdatePage({ user }: any) {
     const router = useRouter();
     const { id } = router.query;
     const [cardData, setCardData] = useState<any>(null);
+    const [lists, setLists] = useState<any[]>([]); // State to hold fetched lists
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {

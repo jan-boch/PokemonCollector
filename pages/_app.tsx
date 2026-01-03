@@ -4,106 +4,147 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import CardLists from '../components/CardLists';
 
 export default function App({ Component, pageProps }: AppProps) {
     const [user, setUser] = useState<any>(null);
-    // New state to manage the active mode for the CardGrid
     const [mode, setMode] = useState<'view' | 'delete' | 'edit'>('view');
+    const [lists, setLists] = useState(['base']);
+    const [activeList, setActiveList] = useState('base');
     const router = useRouter();
 
     useEffect(() => {
-        // ... (auth setup remains the same)
-        supabase.auth.getUser().then(({ data }) => setUser(data.user));
+        const handleAuthStateChange = async (event: any, session: any) => {
+            const currentUser = session?.user ?? null;
+            setUser(currentUser);
 
-        const { data: listener } = supabase.auth.onAuthStateChange(
-            (_, session) => setUser(session?.user ?? null)
-        );
+            if (currentUser) {
+                const { data: fetchedLists, error } = await supabase
+                    .from('lists')
+                    .select('id, name')
+                    .eq('user_id', currentUser.id);
+
+                if (error) {
+                    console.error('Error fetching lists:', error);
+                    setLists([]);
+                    setActiveList('');
+                    return;
+                }
+
+                const listNames = fetchedLists?.map(list => list.name) || [];
+                setLists(listNames);
+
+                if (listNames.length === 0) {
+                    const { data: newlist, error: insertError } = await supabase
+                        .from('lists')
+                        .insert([{ name: 'Base', user_id: currentUser.id }])
+                        .select()
+                        .single();
+
+                    if (insertError) {
+                        console.error('Error creating base list:', insertError);
+                        setLists([]);
+                        setActiveList('');
+                    } else {
+                        setLists(['Base']);
+                        setActiveList('Base');
+                    }
+                } else {
+                    if (listNames.includes('Base')) {
+                        setActiveList('Base');
+                    } else {
+                        setActiveList(listNames[0]);
+                    }
+                }
+            } else {
+                setLists([]);
+                setActiveList('');
+            }
+        };
+
+        // Initial check
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            handleAuthStateChange(null, session);
+        });
+
+        const { data: listener } = supabase.auth.onAuthStateChange(handleAuthStateChange);
 
         return () => listener?.subscription.unsubscribe();
     }, []);
 
-    // ... (logout function remains the same)
     async function logout() {
         await supabase.auth.signOut();
         setUser(null);
-        setMode('view'); // Reset mode on logout
+        setMode('view');
         await router.push('/');
     }
 
-    // Function to toggle modes
     const setModeHandler = (newMode: typeof mode) => {
         setMode(currentMode => (currentMode === newMode ? 'view' : newMode));
     };
 
     return (
-        <div className="container">
-            <header style={{ display: 'flex', justifyContent: 'space-between', padding: '1rem' }}>
-                <h1>
-                    <Link
-                        href="/"
-                        style={{
-                            color: 'inherit',
-                            textDecoration: 'none'
-                        }}>
-                        Pokémon Collection
-                    </Link>
-                </h1>
-                <nav style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                    {user ? (
-                        <>
-                            <Link
-                                href="/add"
-                                style={{
-                                    color: 'blue',
-                                    textDecoration: 'none'
-                                }}>
-                                Add card
-                            </Link>
-                            {' | '}
-                            {/* New Mode Buttons */}
-                            <button onClick={() => setModeHandler('edit')}
-                                style={{
-                                    fontWeight: mode === 'edit' ? 'bold' : 'normal',
-                                    cursor: 'pointer',
-                                    background: 'none',
-                                    border: 'none',
-                                    color: 'blue',
-                                    textDecoration: 'none'
-                            }}>
-                                Edit
-                            </button>
-                            {' | '}
-                            <button onClick={() => setModeHandler('delete')}
-                                style={{
-                                    fontWeight: mode === 'delete' ? 'bold' : 'normal',
-                                    cursor: 'pointer',
-                                    background: 'none',
-                                    border: 'none',
-                                    color: 'blue',
-                                    textDecoration: 'none'
-                            }}>
-                                Delete
-                            </button>
-                            {' | '}
-                            <button onClick={logout}
-                                style={{
-                                    cursor: 'pointer',
-                                    background: 'none',
-                                    border: 'none',
-                                    color: 'blue',
-                                    textDecoration: 'none'
-                                }}>
-                                Logout
-                            </button>
-                        </>
-                    ) : (
-                        <Link href="/login">Login</Link>
-                    )}
-                </nav>
+        <div className="min-h-screen bg-gray-100">
+            <header className="bg-white shadow-md">
+                <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+                    <h1 className="text-2xl font-bold">
+                        <Link href="/" className="text-gray-800 hover:text-gray-600">
+                            Pokémon Collection
+                        </Link>
+                    </h1>
+                    <nav className="flex items-center space-x-4">
+                        {user ? (
+                            <>
+                                <Link href="/add" className="text-blue-500 hover:underline">
+                                    Add card
+                                </Link>
+                                <span className="text-gray-300">|</span>
+                                <button
+                                    onClick={() => setModeHandler('edit')}
+                                    className={`px-3 py-1 rounded ${mode === 'edit' ? 'bg-blue-500 text-white' : 'bg-transparent text-blue-500'} hover:bg-blue-600 hover:text-white transition-colors`}
+                                >
+                                    Edit
+                                </button>
+                                <span className="text-gray-300">|</span>
+                                <button
+                                    onClick={() => setModeHandler('delete')}
+                                    className={`px-3 py-1 rounded ${mode === 'delete' ? 'bg-red-500 text-white' : 'bg-transparent text-red-500'} hover:bg-red-600 hover:text-white transition-colors`}
+                                >
+                                    Delete
+                                </button>
+                                <span className="text-gray-300">|</span>
+                                <button
+                                    onClick={logout}
+                                    className="text-blue-500 hover:underline"
+                                >
+                                    Logout
+                                </button>
+                            </>
+                        ) : (
+                            <Link href="/login" className="text-blue-500 hover:underline">Login</Link>
+                        )}
+                    </nav>
+                </div>
             </header>
-            <main style={{ padding: '1rem' }}>
-                {/* Pass the mode and setMode to the component */}
-                <Component {...pageProps} user={user} mode={mode} setMode={setMode} />
+            {user && (
+                <CardLists
+                    user={user}
+                    lists={lists}
+                    setLists={setLists}
+                    activeList={activeList}
+                    setActiveList={setActiveList}
+                />
+            )}
+            <main className="container mx-auto p-4">
+                <Component
+                    {...pageProps}
+                    user={user}
+                    mode={mode}
+                    setMode={setMode}
+                    activeList={activeList}
+                    lists={lists}
+                    setLists={setLists}
+                />
             </main>
         </div>
     );

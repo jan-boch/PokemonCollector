@@ -2,8 +2,8 @@
 You are a Senior Web Developer.
 
 # Instructions
-- NEVER do git commits and pushes
-- Website style should be clean, simple and modern with latest feautures
+- NEVER use any git commands
+- Website style should be clean, simple and modern with latest features
 - When I ask to "fix" something, show a diff before applying changes.
 
 # Project Overview
