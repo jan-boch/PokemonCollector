@@ -109,3 +109,25 @@ The application's pages are located in the `pages` directory. The main pages are
 ### Deployment
 
 Project is deployed with vercel on the website with URL: https://pokemon-collector-six.vercel.app/
+
+## Latest Progress (January 2026)
+
+- **UI Standardization**: All primary action buttons (Add, Edit, Delete, Logout, Save) have been standardized to a modern, pill-shaped (`rounded-full`) outlined style.
+- **Navigation Enhancement**: Header and main CTA links were converted to buttons using `router.push` to ensure consistent browser rendering and remove default link styling.
+- **Form Modernization**: Login, Add, and Update forms now use a consistent Tailwind CSS design with `rounded-lg` inputs and improved layouts. Added "Back to Collection" navigation to all sub-pages.
+- **Robust State Management**: 
+    - Refactored `App` state to store list objects (ID and name) rather than just strings, reducing redundant database lookups.
+    - Implemented `useRef` and mount checks in `useEffect` hooks to prevent the app from getting "stuck" in a loading state when switching browser tabs or navigating quickly.
+- **UX Improvements**: Added a centered loading spinner and detailed console logging for better debugging of asynchronous operations.
+
+## Development Conventions
+
+### UI Standards
+- **Buttons**: Use `rounded-full` for all primary/secondary action buttons.
+- **Inputs**: Use `rounded-lg` for form inputs.
+- **Layout**: Maintain the original grid layout and inline styling for `CardGrid` and `CardItem` as they are core to the application's specific visual identity.
+
+### State & Auth
+- **Lists**: Always handle lists as objects `{ id, name }`.
+- **Loading States**: Always use `finally` blocks to ensure `setLoading(false)` is called.
+- **Tab Switching**: Use `useRef` to track the current user and active list to prevent unnecessary re-fetches when the window regains focus.

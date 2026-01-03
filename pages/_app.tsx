@@ -109,7 +109,7 @@ export default function App({ Component, pageProps }: AppProps) {
                                     onClick={() => router.push('/add')}
                                     className="px-4 py-2 rounded-full bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors font-medium text-sm shadow-sm"
                                 >
-                                    Add card
+                                    Add Card
                                 </button>
                                 <button
                                     onClick={() => setModeHandler('edit')}
