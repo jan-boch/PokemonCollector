@@ -92,36 +92,49 @@ export default function App({ Component, pageProps }: AppProps) {
                             Pokémon Collection
                         </Link>
                     </h1>
-                    <nav className="flex items-center space-x-4">
+                    <nav className="flex items-center space-x-2">
                         {user ? (
                             <>
-                                <Link href="/add" className="text-blue-500 hover:underline">
+                                <button
+                                    onClick={() => router.push('/add')}
+                                    className="px-4 py-2 rounded-full bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors font-medium text-sm shadow-sm"
+                                >
                                     Add card
-                                </Link>
-                                <span className="text-gray-300">|</span>
+                                </button>
                                 <button
                                     onClick={() => setModeHandler('edit')}
-                                    className={`px-3 py-1 rounded ${mode === 'edit' ? 'bg-blue-500 text-white' : 'bg-transparent text-blue-500'} hover:bg-blue-600 hover:text-white transition-colors`}
+                                    className={`px-4 py-2 rounded-full transition-colors font-medium text-sm shadow-sm ${
+                                        mode === 'edit'
+                                            ? 'bg-blue-600 text-white border border-blue-600'
+                                            : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                                    }`}
                                 >
                                     Edit
                                 </button>
-                                <span className="text-gray-300">|</span>
                                 <button
                                     onClick={() => setModeHandler('delete')}
-                                    className={`px-3 py-1 rounded ${mode === 'delete' ? 'bg-red-500 text-white' : 'bg-transparent text-red-500'} hover:bg-red-600 hover:text-white transition-colors`}
+                                    className={`px-4 py-2 rounded-full transition-colors font-medium text-sm shadow-sm ${
+                                        mode === 'delete'
+                                            ? 'bg-red-600 text-white border border-red-600'
+                                            : 'bg-white border border-gray-300 text-red-600 hover:bg-red-50'
+                                    }`}
                                 >
                                     Delete
                                 </button>
-                                <span className="text-gray-300">|</span>
                                 <button
                                     onClick={logout}
-                                    className="text-blue-500 hover:underline"
+                                    className="px-4 py-2 rounded-full bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors font-medium text-sm shadow-sm"
                                 >
                                     Logout
                                 </button>
                             </>
                         ) : (
-                            <Link href="/login" className="text-blue-500 hover:underline">Login</Link>
+                            <button
+                                onClick={() => router.push('/login')}
+                                className="px-4 py-2 rounded-full bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors font-medium text-sm shadow-sm"
+                            >
+                                Login
+                            </button>
                         )}
                     </nav>
                 </div>

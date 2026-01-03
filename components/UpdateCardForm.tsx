@@ -88,23 +88,79 @@ export default function UpdateCardForm({ initialData, user, lists }: { initialDa
     }
 
     return (
-        <form onSubmit={onSubmit} style={{ display: 'grid', gap: 8 }}>
-            <input value={name} onChange={e => setName(e.target.value)} placeholder="Card name" required maxLength={24} />
-            <input value={setNameVal} onChange={e => setSetNameVal(e.target.value)} placeholder="Set name (optional)" maxLength={35} />
-            <input type="number" value={price} onChange={e => setPrice(e.target.value)} placeholder="Price (e.g. 12,50 or 12.50)" />
-            <input type="url" value={cardmarketUrl} onChange={e => setCardmarketUrl(e.target.value)} placeholder="Cardmarket URL (optional)"/>
-            <select
-                value={selectedList}
-                onChange={e => setSelectedList(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded"
+        <form onSubmit={onSubmit} className="space-y-4 bg-white p-6 rounded-lg shadow-md">
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Card name</label>
+                <input 
+                    value={name} 
+                    onChange={e => setName(e.target.value)} 
+                    placeholder="Card name" 
+                    required 
+                    maxLength={24}
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                />
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Set name (optional)</label>
+                <input 
+                    value={setNameVal} 
+                    onChange={e => setSetNameVal(e.target.value)} 
+                    placeholder="Set name" 
+                    maxLength={35}
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                />
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Price</label>
+                <input 
+                    type="text" 
+                    value={price} 
+                    onChange={e => setPrice(e.target.value)} 
+                    placeholder="Price (e.g. 12,50)"
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                />
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Cardmarket URL (optional)</label>
+                <input 
+                    type="url" 
+                    value={cardmarketUrl} 
+                    onChange={e => setCardmarketUrl(e.target.value)} 
+                    placeholder="https://..."
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                />
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">List</label>
+                <select
+                    value={selectedList}
+                    onChange={e => setSelectedList(e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                >
+                    {lists.map(list => (
+                        <option key={list.id} value={list.name}>{list.name}</option>
+                    ))}
+                </select>
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Image</label>
+                {initialData.image_path && (
+                    <p className="text-xs text-gray-500 mb-2 truncate">Current: {initialData.image_path}</p>
+                )}
+                <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={e => setFile(e.target.files?.[0] ?? null)}
+                    className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                />
+            </div>
+            <button 
+                disabled={loading} 
+                type="submit"
+                className="w-full bg-blue-600 text-white py-2 px-4 rounded-full border border-blue-700 hover:bg-blue-700 disabled:bg-gray-400 transition-colors font-medium shadow-sm"
             >
-                {lists.map(list => (
-                    <option key={list.id} value={list.name}>{list.name}</option>
-                ))}
-            </select>
-            {initialData.image_path && <p>Current image: {initialData.image_path}</p>}
-            <input type="file" accept="image/*" onChange={e => setFile(e.target.files?.[0] ?? null)} />
-            <button disabled={loading} type="submit">Save Changes</button>
+                {loading ? 'Saving...' : 'Save Changes'}
+            </button>
         </form>
     );
 }
