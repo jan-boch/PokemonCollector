@@ -78,7 +78,15 @@ The project follows the standard Next.js project structure.
 The application uses Supabase for its backend. The Supabase client is initialized in `lib/supabaseClient.ts`.
 All interactions with the database and storage are done through the Supabase client.
 
-The database schema consists of a `cards` table with the following columns:
+The database schema consists of the following tables:
+
+### `lists` table
+- `id` (uuid, primary key)
+- `user_id` (uuid, references auth.users)
+- `name` (text)
+- `created_at` (timestamp with time zone)
+
+### `cards` table
 - `id` (uuid, primary key)
 - `created_at` (timestamp with time zone)
 - `name` (text)
@@ -87,6 +95,8 @@ The database schema consists of a `cards` table with the following columns:
 - `cardmarket_url` (text)
 - `image_path` (text)
 - `collected` (boolean)
+- `user_id` (uuid, references auth.users)
+- `list_id` (uuid, references lists)
 
 Card images are stored in a Supabase storage bucket named `card-images`.
 
@@ -114,6 +124,7 @@ Project is deployed with vercel on the website with URL: https://pokemon-collect
 
 - **UI Standardization**: All primary action buttons (Add, Edit, Delete, Logout, Save) have been standardized to a modern, pill-shaped (`rounded-full`) outlined style.
 - **Navigation Enhancement**: Header and main CTA links were converted to buttons using `router.push` to ensure consistent browser rendering and remove default link styling.
+- **List Management**: Added a dedicated "Edit Lists" page (`/lists`) allowing users to rename and delete their card lists. Added "Edit Lists" navigation to the header.
 - **Form Modernization**: Login, Add, and Update forms now use a consistent Tailwind CSS design with `rounded-lg` inputs and improved layouts. Added "Back to Collection" navigation to all sub-pages.
 - **Robust State Management**: 
     - Refactored `App` state to store list objects (ID and name) rather than just strings, reducing redundant database lookups.
