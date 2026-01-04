@@ -112,6 +112,12 @@ export default function App({ Component, pageProps }: AppProps) {
                                     Add Card
                                 </button>
                                 <button
+                                    onClick={() => router.push('/lists')}
+                                    className="px-4 py-2 rounded-full bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors font-medium text-sm shadow-sm"
+                                >
+                                    Edit Lists
+                                </button>
+                                <button
                                     onClick={() => setModeHandler('edit')}
                                     className={`px-4 py-2 rounded-full transition-colors font-medium text-sm shadow-sm ${
                                         mode === 'edit'
@@ -158,13 +164,14 @@ export default function App({ Component, pageProps }: AppProps) {
                     setActiveList={setActiveList}
                 />
             )}
-            <main className="container mx-auto p-4">
+            <main className="container mx-auto px-4 md:px-8 lg:px-16 py-8">
                 <Component
                     {...pageProps}
                     user={user}
                     mode={mode}
                     setMode={setMode}
                     activeList={activeList}
+                    setActiveList={setActiveList}
                     lists={lists}
                     setLists={setLists}
                 />
