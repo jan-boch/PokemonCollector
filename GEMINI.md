@@ -124,6 +124,8 @@ Project is deployed with vercel on the website with URL: https://pokemon-collect
 
 - **UI Standardization**: All primary action buttons (Add, Edit, Delete, Logout, Save) have been standardized to a modern, pill-shaped (`rounded-full`) outlined style.
 - **Navigation Enhancement**: Header and main CTA links were converted to buttons using `router.push` to ensure consistent browser rendering and remove default link styling.
+- **Database Security**: Implemented Row Level Security (RLS) policies for `lists`, `cards`, and `card-images` storage to ensure users can only access their own data.
+- **Layout Adjustments**: Added responsive horizontal padding to the main content container to improve visual balance on all screen sizes.
 - **List Management**: Added a dedicated "Edit Lists" page (`/lists`) allowing users to rename and delete their card lists. Added "Edit Lists" navigation to the header.
 - **Form Modernization**: Login, Add, and Update forms now use a consistent Tailwind CSS design with `rounded-lg` inputs and improved layouts. Added "Back to Collection" navigation to all sub-pages.
 - **Robust State Management**: 

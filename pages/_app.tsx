@@ -164,7 +164,7 @@ export default function App({ Component, pageProps }: AppProps) {
                     setActiveList={setActiveList}
                 />
             )}
-            <main className="container mx-auto p-4">
+            <main className="container mx-auto px-4 md:px-8 lg:px-16 py-8">
                 <Component
                     {...pageProps}
                     user={user}
