@@ -4,7 +4,7 @@ import CardGrid from '../components/CardGrid';
 import { useRouter } from 'next/router';
 
 // Update: Accept the `user` prop
-export default function Home({ user, mode, setMode, activeList, lists, setLists }: { user: any, mode: 'view' | 'delete' | 'edit', setMode: (mode: 'view' | 'delete' | 'edit' ) => void, activeList: string, lists: any[], setLists: React.Dispatch<React.SetStateAction<string[]>> }) {
+export default function Home({ user, mode, setMode, activeList, lists, setLists, listsLoading }: { user: any, mode: 'view' | 'delete' | 'edit', setMode: (mode: 'view' | 'delete' | 'edit' ) => void, activeList: string, lists: { id: string, name: string }[], setLists: React.Dispatch<React.SetStateAction<{ id: string, name: string }[]>>, listsLoading: boolean }) {
     const [cards, setCards] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
@@ -13,15 +13,12 @@ export default function Home({ user, mode, setMode, activeList, lists, setLists 
     useEffect(() => {
         let isMounted = true;
         async function loadData() {
-            console.log('[DEBUG] loadData', { 
-                user: user?.id, 
-                activeList, 
-                lists: lists.length,
-                prevList: prevActiveList.current
-            });
+            if (!user || listsLoading) {
+                // Still waiting for lists to load — keep spinner
+                return;
+            }
 
-            if (!user || !activeList || lists.length === 0) {
-                console.log('[DEBUG] skipping loadData - missing dependencies');
+            if (!activeList || lists.length === 0) {
                 if (isMounted) {
                     setCards([]);
                     setLoading(false);
@@ -51,7 +48,6 @@ export default function Home({ user, mode, setMode, activeList, lists, setLists 
                         if (isMounted) setCards(data ?? []);
                     }
                 } else {
-                    console.warn('Active list not found in lists:', activeList);
                     if (isMounted) setCards([]);
                 }
             } catch (err) {
@@ -61,14 +57,13 @@ export default function Home({ user, mode, setMode, activeList, lists, setLists 
                 if (isMounted) {
                     setLoading(false);
                     prevActiveList.current = activeList;
-                    console.log('[DEBUG] loadData finished');
                 }
             }
         }
 
         loadData();
         return () => { isMounted = false; };
-    }, [user?.id, activeList, lists]);
+    }, [user?.id, activeList, lists, listsLoading]);
 
     if (!user) {
         return (

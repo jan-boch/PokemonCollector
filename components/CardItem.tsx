@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabaseClient';
-import Link from 'next/link'; // Import Link for edit mode
+import Link from 'next/link';
+import { useState } from 'react';
 
 interface CardItemProps {
     card: any;
@@ -27,17 +28,23 @@ function formatPrice(price: number | null): string {
 }
 
 export default function CardItem({ card, onUpdate, mode, onDelete }: CardItemProps) {
-    const imageUrl = card.image_path ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/card-images/${card.image_path}` : null;
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const imageUrl = card.image_path && supabaseUrl
+        ? `${supabaseUrl}/storage/v1/object/public/card-images/${card.image_path}`
+        : null;
     const { cardmarket_url } = card;
+    const [updating, setUpdating] = useState(false);
 
-    // ... (toggleCollected function remains the same)
     async function toggleCollected() {
+        if (updating) return;
+        setUpdating(true);
         const { data, error } = await supabase
             .from('cards')
             .update({ collected: !card.collected })
             .eq('id', card.id)
             .select()
             .single();
+        setUpdating(false);
         if (error) return alert(error.message);
         onUpdate(data);
     }
@@ -130,7 +137,7 @@ export default function CardItem({ card, onUpdate, mode, onDelete }: CardItemPro
                     type="checkbox"
                     checked={card.collected}
                     onChange={toggleCollected}
-                    disabled={mode === 'delete'} // Disable checkbox in delete mode
+                    disabled={mode === 'delete' || updating}
                 /> Collected
             </label>
         </div>

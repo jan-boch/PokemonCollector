@@ -6,7 +6,7 @@ interface CardListsProps {
     lists: { id: string, name: string }[];
     setLists: React.Dispatch<React.SetStateAction<any[]>>;
     activeList: string;
-    setActiveList: React.Dispatch<React.SetStateAction<string>>;
+    setActiveList: (list: string) => void;
 }
 
 export default function CardLists({ user, lists, setLists, activeList, setActiveList }: CardListsProps) {

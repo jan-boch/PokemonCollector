@@ -19,8 +19,8 @@ export default function Login() {
         // but for local development, you can often use a relative path like '/'.
         // Let's use the homepage ('/') as the clean destination.
         const redirectToUrl = process.env.NODE_ENV === 'development'
-            ? 'http://localhost:3000/' // Adjust port if needed
-            : 'YOUR_PRODUCTION_URL/'; // IMPORTANT: Change this for deployment
+            ? 'http://localhost:3000/'
+            : `${process.env.NEXT_PUBLIC_APP_URL}/`;
 
         // --- 2. Pass the redirectTo parameter to signInWithOtp ---
         const { error } = await supabase.auth.signInWithOtp({
