@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
+import type { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
+import type { List } from '../lib/types';
 
 interface CardListsProps {
-    user: any;
-    lists: { id: string, name: string }[];
-    setLists: React.Dispatch<React.SetStateAction<any[]>>;
+    user: User;
+    lists: List[];
+    setLists: React.Dispatch<React.SetStateAction<List[]>>;
     activeList: string;
-    setActiveList: React.Dispatch<React.SetStateAction<string>>;
+    setActiveList: (list: string) => void;
 }
 
 export default function CardLists({ user, lists, setLists, activeList, setActiveList }: CardListsProps) {
@@ -36,8 +38,8 @@ export default function CardLists({ user, lists, setLists, activeList, setActive
             // Update local state to include the new list and set it as active
             setLists(prevLists => [...prevLists, data]);
             setActiveList(newListName);
-        } catch (error: any) {
-            alert('Error adding new list: ' + error.message);
+        } catch (error: unknown) {
+            alert('Error adding new list: ' + (error instanceof Error ? error.message : JSON.stringify(error)));
             console.error(error);
         } finally {
             setLoading(false);

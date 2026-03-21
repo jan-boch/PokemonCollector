@@ -1,12 +1,9 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { useRouter } from 'next/router';
-
 
 export default function Login() {
     const [email, setEmail] = useState('');
     const [loading, setLoading] = useState(false);
-    const router = useRouter();
 
 
     async function signInWithEmail(e: React.FormEvent) {
@@ -19,8 +16,8 @@ export default function Login() {
         // but for local development, you can often use a relative path like '/'.
         // Let's use the homepage ('/') as the clean destination.
         const redirectToUrl = process.env.NODE_ENV === 'development'
-            ? 'http://localhost:3000/' // Adjust port if needed
-            : 'YOUR_PRODUCTION_URL/'; // IMPORTANT: Change this for deployment
+            ? 'http://localhost:3000/'
+            : `${process.env.NEXT_PUBLIC_APP_URL}/`;
 
         // --- 2. Pass the redirectTo parameter to signInWithOtp ---
         const { error } = await supabase.auth.signInWithOtp({
@@ -59,7 +56,7 @@ export default function Login() {
                 </button>
             </form>
             <p className="mt-4 text-sm text-gray-500 text-center">
-                We'll email you a magic link for a password-free sign in.
+                We&apos;ll email you a magic link for a password-free sign in.
             </p>
         </div>
     );

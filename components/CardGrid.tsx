@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import CardItem from './CardItem';
 import { supabase } from '../lib/supabaseClient'; // Import for deletion
+import type { Card } from '../lib/types';
 
 interface CardGridProps {
-    initialCards: any[];
+    initialCards: Card[];
     mode: 'view' | 'delete' | 'edit';
     setMode: (mode: 'view' | 'delete' | 'edit') => void;
-    setCards: React.Dispatch<React.SetStateAction<any[]>>; // To update list in index.tsx
+    setCards: React.Dispatch<React.SetStateAction<Card[]>>; // To update list in index.tsx
 }
 
 export default function CardGrid({ initialCards, mode, setMode, setCards }: CardGridProps) {
@@ -20,7 +21,7 @@ export default function CardGrid({ initialCards, mode, setMode, setCards }: Card
     }, [initialCards]); // <-- Dependency array is used with useEffect
 
     // Handler for updating a single card (used for 'collected' checkbox)
-    function updateCard(updated: any) {
+    function updateCard(updated: Card) {
         const newCards = cards.map(c => c.id === updated.id ? updated : c);
         setCardsState(newCards);
         setCards(newCards); // Update parent state in index.tsx

@@ -1,21 +1,29 @@
 import '../styles/globals.css';
 import type { AppProps } from 'next/app';
 import React, { useEffect, useState, useRef } from 'react';
+import type { User, AuthChangeEvent, Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import CardLists from '../components/CardLists';
+import type { List } from '../lib/types';
 
 export default function App({ Component, pageProps }: AppProps) {
-    const [user, setUser] = useState<any>(null);
+    const [user, setUser] = useState<User | null>(null);
     const [mode, setMode] = useState<'view' | 'delete' | 'edit'>('view');
-    const [lists, setLists] = useState<any[]>([]);
+    const [lists, setLists] = useState<List[]>([]);
     const [activeList, setActiveList] = useState<string>('');
+    const [listsLoading, setListsLoading] = useState(false);
     const router = useRouter();
     const lastUserId = useRef<string | null>(null);
 
+    const handleSetActiveList = (list: string) => {
+        setActiveList(list);
+        localStorage.setItem('activeList', list);
+    };
+
     useEffect(() => {
-        const handleAuthStateChange = async (event: any, session: any) => {
+        const handleAuthStateChange = async (_event: AuthChangeEvent | null, session: Session | null) => {
             const currentUser = session?.user ?? null;
             
             if (!currentUser) {
@@ -36,8 +44,8 @@ export default function App({ Component, pageProps }: AppProps) {
 
             lastUserId.current = currentUser.id;
             setUser(currentUser);
+            setListsLoading(true);
 
-            console.log('User changed or initial login, fetching lists...');
             const { data: fetchedLists, error } = await supabase
                 .from('lists')
                 .select('id, name')
@@ -45,15 +53,20 @@ export default function App({ Component, pageProps }: AppProps) {
 
             if (error) {
                 console.error('Error fetching lists:', error);
+                setListsLoading(false);
                 return;
             }
 
             if (fetchedLists && fetchedLists.length > 0) {
                 setLists(fetchedLists);
-                
+
                 setActiveList(current => {
                     if (current && fetchedLists.some(l => l.name === current)) {
                         return current;
+                    }
+                    const saved = localStorage.getItem('activeList');
+                    if (saved && fetchedLists.some(l => l.name === saved)) {
+                        return saved;
                     }
                     const hasBase = fetchedLists.some(l => l.name === 'Base');
                     return hasBase ? 'Base' : fetchedLists[0].name;
@@ -67,9 +80,10 @@ export default function App({ Component, pageProps }: AppProps) {
 
                 if (!insertError && newList) {
                     setLists([newList]);
-                    setActiveList('Base');
+                    handleSetActiveList('Base');
                 }
             }
+            setListsLoading(false);
         };
 
         // Initial check
@@ -161,7 +175,7 @@ export default function App({ Component, pageProps }: AppProps) {
                     lists={lists}
                     setLists={setLists}
                     activeList={activeList}
-                    setActiveList={setActiveList}
+                    setActiveList={handleSetActiveList}
                 />
             )}
             <main className="container mx-auto px-4 md:px-8 lg:px-16 py-8">
@@ -171,9 +185,10 @@ export default function App({ Component, pageProps }: AppProps) {
                     mode={mode}
                     setMode={setMode}
                     activeList={activeList}
-                    setActiveList={setActiveList}
+                    setActiveList={handleSetActiveList}
                     lists={lists}
                     setLists={setLists}
+                    listsLoading={listsLoading}
                 />
             </main>
         </div>

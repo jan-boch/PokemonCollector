@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import type { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
 import { useRouter } from 'next/router';
+import type { Card, List } from '../lib/types';
 
-interface List {
-    id: string;
-    name: string;
-}
-
-export default function UpdateCardForm({ initialData, user, lists }: { initialData: any, user: any, lists: List[] }) {
+export default function UpdateCardForm({ initialData, user, lists }: { initialData: Card, user: User, lists: List[] }) {
     const [name, setName] = useState(initialData.name);
     const [setNameVal, setSetNameVal] = useState(initialData.set_name || '');
     const [price, setPrice] = useState(initialData.price ? String(initialData.price) : '');
@@ -36,7 +33,8 @@ export default function UpdateCardForm({ initialData, user, lists }: { initialDa
         const filePath = `${user.id}/${Date.now()}_${fileName}`;
         // Delete old image if it exists before uploading a new one, for cleanup
         if (initialData.image_path) {
-            await supabase.storage.from('card-images').remove([initialData.image_path]);
+            const { error: removeError } = await supabase.storage.from('card-images').remove([initialData.image_path]);
+            if (removeError) console.error('Failed to delete old image:', removeError);
         }
         const { error } = await supabase.storage
             .from('card-images')
@@ -47,7 +45,6 @@ export default function UpdateCardForm({ initialData, user, lists }: { initialDa
 
     async function onSubmit(e: React.FormEvent) {
         e.preventDefault();
-        console.log('Update form submission started');
         setLoading(true);
         try {
             const normalizedPriceString = price.replace(',', '.');
@@ -58,7 +55,6 @@ export default function UpdateCardForm({ initialData, user, lists }: { initialDa
 
             let image_path = initialData.image_path;
             if (file) {
-                console.log('Uploading new image...');
                 image_path = await uploadImage(file.name, file);
             }
 
@@ -67,7 +63,6 @@ export default function UpdateCardForm({ initialData, user, lists }: { initialDa
                 throw new Error('Selected list not found.');
             }
 
-            console.log('Updating card in database...');
             const { error } = await supabase
                 .from('cards')
                 .update({
@@ -76,24 +71,18 @@ export default function UpdateCardForm({ initialData, user, lists }: { initialDa
                     price: finalPrice,
                     cardmarket_url: cardmarketUrl || null,
                     image_path,
-                    list_id: targetList.id, // Update list_id
+                    list_id: targetList.id,
                 })
                 .eq('id', initialData.id);
 
-            if (error) {
-                console.error('Supabase update error:', error);
-                throw error;
-            }
-            
-            console.log('Card updated successfully');
+            if (error) throw error;
+
             alert('Card updated successfully!');
             router.push('/');
-        } catch (err: any) {
-            console.error('Update error:', err);
-            alert(err.message || JSON.stringify(err));
+        } catch (err: unknown) {
+            alert(err instanceof Error ? err.message : JSON.stringify(err));
         } finally {
             setLoading(false);
-            console.log('Update form submission ended');
         }
     }
 
