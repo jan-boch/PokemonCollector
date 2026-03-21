@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import type { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
 import { useRouter } from 'next/router';
+import type { List } from '../lib/types';
 
-export default function AddCardForm({ user, lists, activeList }: { user: any, lists: { id: string, name: string }[], activeList: string }) {
+export default function AddCardForm({ user, lists, activeList }: { user: User, lists: List[], activeList: string }) {
     const [name, setName] = useState('');
     const [setNameVal, setSetNameVal] = useState('');
     const [price, setPrice] = useState('');
@@ -55,8 +57,8 @@ export default function AddCardForm({ user, lists, activeList }: { user: any, li
             alert('Card added');
             setName(''); setSetNameVal(''); setPrice(''); setFile(null);
             router.push('/');
-        } catch (err: any) {
-            alert(err.message || JSON.stringify(err));
+        } catch (err: unknown) {
+            alert(err instanceof Error ? err.message : JSON.stringify(err));
         } finally {
             setLoading(false);
         }

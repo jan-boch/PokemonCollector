@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import type { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
 import { useRouter } from 'next/router';
+import type { Card, List } from '../lib/types';
 
-interface List {
-    id: string;
-    name: string;
-}
-
-export default function UpdateCardForm({ initialData, user, lists }: { initialData: any, user: any, lists: List[] }) {
+export default function UpdateCardForm({ initialData, user, lists }: { initialData: Card, user: User, lists: List[] }) {
     const [name, setName] = useState(initialData.name);
     const [setNameVal, setSetNameVal] = useState(initialData.set_name || '');
     const [price, setPrice] = useState(initialData.price ? String(initialData.price) : '');
@@ -82,8 +79,8 @@ export default function UpdateCardForm({ initialData, user, lists }: { initialDa
 
             alert('Card updated successfully!');
             router.push('/');
-        } catch (err: any) {
-            alert(err.message || JSON.stringify(err));
+        } catch (err: unknown) {
+            alert(err instanceof Error ? err.message : JSON.stringify(err));
         } finally {
             setLoading(false);
         }

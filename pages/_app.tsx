@@ -1,15 +1,17 @@
 import '../styles/globals.css';
 import type { AppProps } from 'next/app';
 import React, { useEffect, useState, useRef } from 'react';
+import type { User, AuthChangeEvent, Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import CardLists from '../components/CardLists';
+import type { List } from '../lib/types';
 
 export default function App({ Component, pageProps }: AppProps) {
-    const [user, setUser] = useState<any>(null);
+    const [user, setUser] = useState<User | null>(null);
     const [mode, setMode] = useState<'view' | 'delete' | 'edit'>('view');
-    const [lists, setLists] = useState<any[]>([]);
+    const [lists, setLists] = useState<List[]>([]);
     const [activeList, setActiveList] = useState<string>('');
     const [listsLoading, setListsLoading] = useState(false);
     const router = useRouter();
@@ -21,7 +23,7 @@ export default function App({ Component, pageProps }: AppProps) {
     };
 
     useEffect(() => {
-        const handleAuthStateChange = async (event: any, session: any) => {
+        const handleAuthStateChange = async (_event: AuthChangeEvent | null, session: Session | null) => {
             const currentUser = session?.user ?? null;
             
             if (!currentUser) {

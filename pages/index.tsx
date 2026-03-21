@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
+import type { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
 import CardGrid from '../components/CardGrid';
 import { useRouter } from 'next/router';
+import type { Card, List } from '../lib/types';
 
-// Update: Accept the `user` prop
-export default function Home({ user, mode, setMode, activeList, lists, setLists, listsLoading }: { user: any, mode: 'view' | 'delete' | 'edit', setMode: (mode: 'view' | 'delete' | 'edit' ) => void, activeList: string, lists: { id: string, name: string }[], setLists: React.Dispatch<React.SetStateAction<{ id: string, name: string }[]>>, listsLoading: boolean }) {
-    const [cards, setCards] = useState<any[]>([]);
+export default function Home({ user, mode, setMode, activeList, lists, listsLoading }: { user: User | null, mode: 'view' | 'delete' | 'edit', setMode: (mode: 'view' | 'delete' | 'edit' ) => void, activeList: string, lists: List[], listsLoading: boolean }) {
+    const [cards, setCards] = useState<Card[]>([]);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
     const prevActiveList = React.useRef(activeList);
@@ -13,7 +14,7 @@ export default function Home({ user, mode, setMode, activeList, lists, setLists,
     useEffect(() => {
         let isMounted = true;
         async function loadData() {
-            if (!user || listsLoading) {
+            if (!user?.id || listsLoading) {
                 // Still waiting for lists to load — keep spinner
                 return;
             }
@@ -27,10 +28,10 @@ export default function Home({ user, mode, setMode, activeList, lists, setLists,
             }
 
             // Only show full loading if the list has actually changed
-            if (prevActiveList.current !== activeList || cards.length === 0) {
+            if (prevActiveList.current !== activeList) {
                 if (isMounted) setLoading(true);
             }
-            
+
             try {
                 const activeListData = lists.find(list => list.name === activeList);
 
@@ -95,7 +96,7 @@ export default function Home({ user, mode, setMode, activeList, lists, setLists,
                     <div className="text-5xl mb-4">🎴</div>
                     <h3 className="text-xl font-semibold text-gray-800 mb-2">Your collection is empty</h3>
                     <p className="text-gray-500 mb-6">Start adding your favorite Pokémon cards to track them!</p>
-                    <button 
+                    <button
                         onClick={() => router.push('/add')}
                         className="inline-flex items-center px-6 py-3 rounded-full bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors font-medium shadow-md"
                     >

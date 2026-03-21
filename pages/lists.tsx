@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import type { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
 import { useRouter } from 'next/router';
+import type { List } from '../lib/types';
 
-export default function ManageLists({ user, lists, setLists, setActiveList }: { user: any, lists: any[], setLists: React.Dispatch<React.SetStateAction<any[]>>, setActiveList: React.Dispatch<React.SetStateAction<string>> }) {
+export default function ManageLists({ user, lists, setLists, activeList, setActiveList }: { user: User | null, lists: List[], setLists: React.Dispatch<React.SetStateAction<List[]>>, activeList: string, setActiveList: (list: string) => void }) {
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editName, setEditName] = useState('');
     const [loading, setLoading] = useState(false);
@@ -12,7 +14,7 @@ export default function ManageLists({ user, lists, setLists, setActiveList }: { 
         return <div className="text-center py-20">Please log in to manage your lists.</div>;
     }
 
-    const startEditing = (list: any) => {
+    const startEditing = (list: List) => {
         setEditingId(list.id);
         setEditName(list.name);
     };
@@ -40,14 +42,14 @@ export default function ManageLists({ user, lists, setLists, setActiveList }: { 
 
             setLists(prev => prev.map(l => l.id === id ? { ...l, name: editName } : l));
             setEditingId(null);
-        } catch (error: any) {
-            alert('Error renaming list: ' + error.message);
+        } catch (error: unknown) {
+            alert('Error renaming list: ' + (error instanceof Error ? error.message : JSON.stringify(error)));
         } finally {
             setLoading(false);
         }
     };
 
-    const handleDelete = async (list: any) => {
+    const handleDelete = async (list: List) => {
         if (lists.length <= 1) {
             alert('You must have at least one list.');
             return;
@@ -68,11 +70,11 @@ export default function ManageLists({ user, lists, setLists, setActiveList }: { 
 
             const updatedLists = lists.filter(l => l.id !== list.id);
             setLists(updatedLists);
-            
+
             // If we deleted the active list, switch to another one
-            setActiveList(prev => prev === list.name ? updatedLists[0].name : prev);
-        } catch (error: any) {
-            alert('Error deleting list: ' + error.message);
+            if (activeList === list.name) setActiveList(updatedLists[0].name);
+        } catch (error: unknown) {
+            alert('Error deleting list: ' + (error instanceof Error ? error.message : JSON.stringify(error)));
         } finally {
             setLoading(false);
         }

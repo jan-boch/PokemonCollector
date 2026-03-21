@@ -1,10 +1,12 @@
 import { supabase } from '../lib/supabaseClient';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState } from 'react';
+import type { Card } from '../lib/types';
 
 interface CardItemProps {
-    card: any;
-    onUpdate: (c:any) => void;
+    card: Card;
+    onUpdate: (c: Card) => void;
     mode: 'view' | 'delete' | 'edit'; // New prop
     onDelete: (id: string) => void; // New prop
 }
@@ -51,8 +53,13 @@ export default function CardItem({ card, onUpdate, mode, onDelete }: CardItemPro
 
     // Image element definition
     const ImageElement = imageUrl ? (
-        <img src={imageUrl} alt={card.name} style=
-            {{
+        <Image
+            src={imageUrl}
+            alt={card.name}
+            unoptimized
+            width={230}
+            height={230}
+            style={{
                 maxWidth: '100%',
                 maxHeight: 230,
                 height: 'auto',
