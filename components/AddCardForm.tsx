@@ -42,6 +42,16 @@ export default function AddCardForm({ user, lists, activeList }: { user: User, l
                 throw new Error('Could not find the selected list.');
             }
 
+            const { data: maxData } = await supabase
+                .from('cards')
+                .select('position')
+                .eq('list_id', targetList.id)
+                .order('position', { ascending: false })
+                .limit(1);
+            const nextPosition = maxData && maxData.length > 0 && maxData[0].position !== null
+                ? maxData[0].position + 1
+                : 0;
+
             const { error } = await supabase.from('cards').insert([{
                 name,
                 set_name: setNameVal,
@@ -50,6 +60,7 @@ export default function AddCardForm({ user, lists, activeList }: { user: User, l
                 image_path,
                 list_id: targetList.id,
                 user_id: user.id,
+                position: nextPosition,
             }]).select();
 
             if (error) throw error;

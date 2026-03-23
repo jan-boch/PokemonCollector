@@ -1,4 +1,4 @@
-.PHONY: help run build start lint db-start db-stop db-mail db-login db-migrate
+.PHONY: help run build start lint db-start db-stop db-mail db-login db-up db-push db-reset db-studio
 
 SUPABASE_PROJECT_REF=gdooocbtquidgvyymash
 
@@ -12,7 +12,10 @@ help:
 	@echo   db-stop      - Stop local Supabase instance
 	@echo   db-mail      - Open local email inbox (Mailpit)
 	@echo   db-login     - Log in to Supabase CLI
-	@echo   db-migrate   - Pull remote schema and apply to local DB
+	@echo   db-up        - Apply pending migrations to local DB (keeps existing data)
+	@echo   db-push      - Apply pending migrations to remote DB only
+	@echo   db-reset     - Wipe and recreate local DB from scratch (destroys local data)
+	@echo   db-studio    - Open local Supabase Studio (table editor, SQL runner)
 
 run:
 	npm run dev
@@ -38,7 +41,15 @@ db-mail:
 db-login:
 	npx supabase login
 
-db-migrate:
+db-up:
+	npx supabase migration up
+
+db-push:
 	npx supabase link --project-ref $(SUPABASE_PROJECT_REF)
-	npx supabase db pull
+	npx supabase db push
+
+db-reset:
 	npx supabase db reset
+
+db-studio:
+	powershell.exe -c "Start-Process 'http://127.0.0.1:54323'"
