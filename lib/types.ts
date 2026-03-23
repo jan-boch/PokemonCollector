@@ -14,4 +14,5 @@ export interface Card {
     user_id: string;
     collected: boolean;
     created_at: string;
+    position: number | null;
 }

@@ -40,7 +40,7 @@ export default function Home({ user, mode, setMode, activeList, lists, listsLoad
                         .from('cards')
                         .select('*')
                         .eq('list_id', activeListData.id)
-                        .order('created_at', { ascending: false });
+                        .order('position', { ascending: true, nullsFirst: false });
 
                     if (error) {
                         console.error('Supabase fetch error:', error);
