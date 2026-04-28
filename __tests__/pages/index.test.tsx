@@ -78,7 +78,7 @@ describe('Home (index page)', () => {
                     order: jest.fn().mockResolvedValue({ data: [], error: null }),
                 }),
             }),
-        } as any);
+        } as unknown as ReturnType<typeof supabase.from>);
 
         render(<Home {...defaultProps} user={mockUser} />);
 
@@ -95,7 +95,7 @@ describe('Home (index page)', () => {
                     order: jest.fn().mockResolvedValue({ data: cards, error: null }),
                 }),
             }),
-        } as any);
+        } as unknown as ReturnType<typeof supabase.from>);
 
         render(<Home {...defaultProps} user={mockUser} />);
 

@@ -160,7 +160,7 @@ describe('CardItem', () => {
                     }),
                 }),
             }),
-        } as any);
+        } as unknown as ReturnType<typeof supabase.from>);
 
         render(<CardItem card={baseCard} onUpdate={onUpdate} mode="view" onDelete={onDelete} />);
         fireEvent.click(screen.getByRole('checkbox'));
@@ -179,7 +179,7 @@ describe('CardItem', () => {
                     }),
                 }),
             }),
-        } as any);
+        } as unknown as ReturnType<typeof supabase.from>);
 
         render(<CardItem card={baseCard} onUpdate={onUpdate} mode="view" onDelete={onDelete} />);
         fireEvent.click(screen.getByRole('checkbox'));

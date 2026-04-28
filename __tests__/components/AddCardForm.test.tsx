@@ -52,7 +52,7 @@ function setupInsertMock(
         }),
         // Used by the insert query — shared spy so we can inspect calls
         insert: mockInsert,
-    } as any));
+    } as unknown as ReturnType<typeof supabase.from>));
 }
 
 describe('AddCardForm', () => {
@@ -100,6 +100,11 @@ describe('AddCardForm', () => {
     it('renders the submit button', () => {
         render(<AddCardForm user={mockUser} lists={mockLists} activeList="Base" />);
         expect(screen.getByRole('button', { name: 'Add card' })).toBeInTheDocument();
+    });
+
+    it('enforces maxLength of 32 on the card name input', () => {
+        render(<AddCardForm user={mockUser} lists={mockLists} activeList="Base" />);
+        expect(screen.getByPlaceholderText('Card name')).toHaveAttribute('maxLength', '32');
     });
 
     // --- Submission ---
@@ -220,7 +225,7 @@ describe('AddCardForm', () => {
             insert: jest.fn().mockReturnValue({
                 select: jest.fn().mockResolvedValue({ data: null, error: { message: 'Insert error' } }),
             }),
-        } as any));
+        } as unknown as ReturnType<typeof supabase.from>));
 
         render(<AddCardForm user={mockUser} lists={mockLists} activeList="Base" />);
         fireEvent.change(screen.getByPlaceholderText('Card name'), { target: { value: 'Jigglypuff' } });

@@ -127,7 +127,7 @@ describe('CardLists', () => {
                     single: jest.fn().mockResolvedValue({ data: newList, error: null }),
                 }),
             }),
-        } as any);
+        } as unknown as ReturnType<typeof supabase.from>);
 
         render(
             <CardLists
@@ -152,6 +152,7 @@ describe('CardLists', () => {
     });
 
     it('shows alert when supabase returns an error on insert', async () => {
+        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
         (window.prompt as jest.Mock).mockReturnValue('ErrorList');
         mockFrom.mockReturnValue({
             insert: jest.fn().mockReturnValue({
@@ -159,7 +160,7 @@ describe('CardLists', () => {
                     single: jest.fn().mockResolvedValue({ data: null, error: { message: 'Insert failed' } }),
                 }),
             }),
-        } as any);
+        } as unknown as ReturnType<typeof supabase.from>);
 
         render(
             <CardLists
@@ -176,5 +177,6 @@ describe('CardLists', () => {
             expect(window.alert).toHaveBeenCalledWith(expect.stringContaining('Insert failed'));
         });
         expect(setLists).not.toHaveBeenCalled();
+        consoleErrorSpy.mockRestore();
     });
 });

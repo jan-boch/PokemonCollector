@@ -82,7 +82,7 @@ export default function AddCardForm({ user, lists, activeList }: { user: User, l
                 onChange={e => setName(e.target.value)}
                 placeholder="Card name"
                 required
-                maxLength={24}
+                maxLength={32}
                 className="w-full p-2 border border-gray-300 rounded-lg"
             />
             <input

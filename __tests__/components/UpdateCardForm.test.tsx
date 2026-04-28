@@ -104,7 +104,7 @@ describe('UpdateCardForm', () => {
         const mockUpdate = jest.fn().mockReturnValue({
             eq: jest.fn().mockResolvedValue({ error: null }),
         });
-        mockFrom.mockReturnValue({ update: mockUpdate } as any);
+        mockFrom.mockReturnValue({ update: mockUpdate } as unknown as ReturnType<typeof supabase.from>);
 
         render(<UpdateCardForm initialData={initialCard} user={mockUser} lists={mockLists} />);
 
@@ -126,7 +126,7 @@ describe('UpdateCardForm', () => {
         const mockUpdate = jest.fn().mockReturnValue({
             eq: jest.fn().mockResolvedValue({ error: null }),
         });
-        mockFrom.mockReturnValue({ update: mockUpdate } as any);
+        mockFrom.mockReturnValue({ update: mockUpdate } as unknown as ReturnType<typeof supabase.from>);
 
         render(<UpdateCardForm initialData={cardWithCommaPrice} user={mockUser} lists={mockLists} />);
         fireEvent.change(screen.getByPlaceholderText(/Price/), { target: { value: '12,50' } });
@@ -143,7 +143,7 @@ describe('UpdateCardForm', () => {
         const mockUpdate = jest.fn().mockReturnValue({
             eq: jest.fn().mockResolvedValue({ error: null }),
         });
-        mockFrom.mockReturnValue({ update: mockUpdate } as any);
+        mockFrom.mockReturnValue({ update: mockUpdate } as unknown as ReturnType<typeof supabase.from>);
 
         render(<UpdateCardForm initialData={initialCard} user={mockUser} lists={mockLists} />);
         fireEvent.change(screen.getByPlaceholderText(/Price/), { target: { value: '' } });
@@ -159,5 +159,10 @@ describe('UpdateCardForm', () => {
     it('shows Save Changes button initially', () => {
         render(<UpdateCardForm initialData={initialCard} user={mockUser} lists={mockLists} />);
         expect(screen.getByRole('button', { name: 'Save Changes' })).toBeInTheDocument();
+    });
+
+    it('enforces maxLength of 32 on the card name input', () => {
+        render(<UpdateCardForm initialData={initialCard} user={mockUser} lists={mockLists} />);
+        expect(screen.getByPlaceholderText('Card name')).toHaveAttribute('maxLength', '32');
     });
 });

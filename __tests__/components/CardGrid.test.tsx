@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import CardGrid from '../../components/CardGrid';
 import type { Card } from '../../lib/types';
 import { supabase } from '../../lib/supabaseClient';
@@ -101,15 +101,17 @@ describe('CardGrid', () => {
     it('updates cards state and calls supabase when drag ends on a different card', async () => {
         const mockEq = jest.fn().mockResolvedValue({ error: null });
         const mockUpdate = jest.fn().mockReturnValue({ eq: mockEq });
-        mockFrom.mockReturnValue({ update: mockUpdate } as any);
+        mockFrom.mockReturnValue({ update: mockUpdate } as unknown as ReturnType<typeof supabase.from>);
 
         render(<CardGrid initialCards={cards} mode="view" setMode={setMode} setCards={setCards} />);
 
         // Simulate dragging card-1 over card-3 (position 0 → position 2)
-        capturedOnDragEnd!({
-            active: { id: 'card-1' },
-            over: { id: 'card-3' },
-        } as DragEndEvent);
+        act(() => {
+            capturedOnDragEnd!({
+                active: { id: 'card-1' },
+                over: { id: 'card-3' },
+            } as DragEndEvent);
+        });
 
         await waitFor(() => {
             // 3 position updates expected (one per card)
@@ -125,10 +127,12 @@ describe('CardGrid', () => {
     it('does nothing when drag ends on the same card', async () => {
         render(<CardGrid initialCards={cards} mode="view" setMode={setMode} setCards={setCards} />);
 
-        capturedOnDragEnd!({
-            active: { id: 'card-1' },
-            over: { id: 'card-1' },
-        } as DragEndEvent);
+        act(() => {
+            capturedOnDragEnd!({
+                active: { id: 'card-1' },
+                over: { id: 'card-1' },
+            } as DragEndEvent);
+        });
 
         await waitFor(() => {
             expect(mockFrom).not.toHaveBeenCalled();
@@ -138,10 +142,12 @@ describe('CardGrid', () => {
     it('does nothing when there is no over target', async () => {
         render(<CardGrid initialCards={cards} mode="view" setMode={setMode} setCards={setCards} />);
 
-        capturedOnDragEnd!({
-            active: { id: 'card-1' },
-            over: null,
-        } as DragEndEvent);
+        act(() => {
+            capturedOnDragEnd!({
+                active: { id: 'card-1' },
+                over: null,
+            } as DragEndEvent);
+        });
 
         await waitFor(() => {
             expect(mockFrom).not.toHaveBeenCalled();
@@ -151,7 +157,7 @@ describe('CardGrid', () => {
     it('deletes a card from supabase and updates state when confirmed', async () => {
         const mockEq = jest.fn().mockResolvedValue({ error: null });
         const mockDelete = jest.fn().mockReturnValue({ eq: mockEq });
-        mockFrom.mockReturnValue({ delete: mockDelete } as any);
+        mockFrom.mockReturnValue({ delete: mockDelete } as unknown as ReturnType<typeof supabase.from>);
 
         render(<CardGrid initialCards={cards} mode="delete" setMode={setMode} setCards={setCards} />);
 
