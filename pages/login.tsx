@@ -4,60 +4,84 @@ import { supabase } from '../lib/supabaseClient';
 export default function Login() {
     const [email, setEmail] = useState('');
     const [loading, setLoading] = useState(false);
-
+    const [sent, setSent] = useState(false);
+    const [errorMsg, setErrorMsg] = useState('');
 
     async function signInWithEmail(e: React.FormEvent) {
         e.preventDefault();
         setLoading(true);
+        setErrorMsg('');
 
-        // --- 1. Define the redirect URL ---
-        // This tells Supabase where to send the user AFTER they click the email link.
-        // The URL needs to be absolute (start with http/https) in a real deployment,
-        // but for local development, you can often use a relative path like '/'.
-        // Let's use the homepage ('/') as the clean destination.
         const redirectToUrl = process.env.NODE_ENV === 'development'
             ? 'http://localhost:3000/'
             : `${process.env.NEXT_PUBLIC_APP_URL}/`;
 
-        // --- 2. Pass the redirectTo parameter to signInWithOtp ---
         const { error } = await supabase.auth.signInWithOtp({
             email,
-            options: {
-                emailRedirectTo: redirectToUrl
-            }
+            options: { emailRedirectTo: redirectToUrl },
         });
 
         setLoading(false);
-        if (error) alert(error.message);
-        else alert('Check your email for the sign-in link');
+        if (error) {
+            setErrorMsg(error.message);
+        } else {
+            setSent(true);
+        }
+    }
+
+    if (sent) {
+        return (
+            <div className="max-w-md mx-auto mt-10 p-8 bg-white rounded-xl shadow-sm border border-gray-100 text-center">
+                <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-5">
+                    <svg className="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <h2 className="text-xl font-bold text-gray-900 mb-2">Check your inbox</h2>
+                <p className="text-sm text-gray-500 mb-6 leading-relaxed">
+                    We sent a magic link to{' '}
+                    <span className="font-semibold text-gray-700">{email}</span>.
+                    <br />Click it to sign in — no password needed.
+                </p>
+                <button
+                    onClick={() => { setSent(false); setEmail(''); }}
+                    className="text-sm text-indigo-600 hover:text-indigo-700 font-medium transition-colors"
+                >
+                    Use a different email
+                </button>
+            </div>
+        );
     }
 
     return (
-        <div className="max-w-md mx-auto mt-10 p-8 bg-white rounded-xl shadow-lg">
-            <h2 className="text-2xl font-bold mb-6 text-gray-800 text-center">Sign in / Sign up</h2>
+        <div className="max-w-md mx-auto mt-10 p-8 bg-white rounded-xl shadow-sm border border-gray-100">
+            <h2 className="text-2xl font-bold mb-1 text-gray-900 text-center">Sign in</h2>
+            <p className="text-sm text-gray-400 text-center mb-6">We&apos;ll send a magic link to your email.</p>
             <form onSubmit={signInWithEmail} className="space-y-4">
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                    <input 
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Email address</label>
+                    <input
                         type="email"
-                        value={email} 
-                        onChange={(e) => setEmail(e.target.value)} 
-                        placeholder="you@example.com" 
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="you@example.com"
                         required
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                        className="w-full px-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all text-sm"
                     />
                 </div>
-                <button 
-                    disabled={loading} 
+                {errorMsg && (
+                    <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+                        {errorMsg}
+                    </p>
+                )}
+                <button
+                    disabled={loading}
                     type="submit"
-                    className="w-full bg-blue-600 text-white py-3 px-4 rounded-full border border-blue-700 hover:bg-blue-700 disabled:bg-gray-400 transition-colors font-medium shadow-md"
+                    className="w-full bg-indigo-600 text-white py-2.5 px-4 rounded-full hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-semibold shadow-sm"
                 >
-                    {loading ? 'Sending link...' : 'Send Magic Link'}
+                    {loading ? 'Sending…' : 'Send Magic Link'}
                 </button>
             </form>
-            <p className="mt-4 text-sm text-gray-500 text-center">
-                We&apos;ll email you a magic link for a password-free sign in.
-            </p>
         </div>
     );
 }

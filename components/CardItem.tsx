@@ -62,20 +62,24 @@ export default function CardItem({ card, onUpdate, mode, onDelete }: CardItemPro
             {mode === 'delete' && (
                 <button
                     onClick={() => onDelete(card.id)}
-                    className="absolute top-2 right-2 z-10 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center font-bold text-base leading-none transition-colors shadow"
+                    className="absolute top-2 right-2 z-10 w-7 h-7 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-colors shadow"
                     title={`Delete ${card.name}`}
                 >
-                    ×
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                 </button>
             )}
 
             {mode === 'edit' && (
                 <Link
                     href={`/update/${card.id}`}
-                    className="absolute top-2 right-2 z-10 w-7 h-7 bg-white border border-gray-200 rounded-full flex items-center justify-center text-sm shadow hover:bg-indigo-50 transition-colors"
+                    className="absolute top-2 right-2 z-10 w-7 h-7 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full flex items-center justify-center transition-colors shadow"
                     title={`Edit ${card.name}`}
                 >
-                    ✏️
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
                 </Link>
             )}
 

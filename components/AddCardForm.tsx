@@ -75,57 +75,85 @@ export default function AddCardForm({ user, lists, activeList }: { user: User, l
         }
     }
 
+    const inputClass = "w-full px-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all text-sm";
+    const labelClass = "block text-sm font-medium text-gray-700 mb-1";
+
     return (
-        <form onSubmit={onSubmit} className="space-y-4 bg-white p-6 rounded-lg shadow-md">
-            <input
-                value={name}
-                onChange={e => setName(e.target.value)}
-                placeholder="Card name"
-                required
-                maxLength={32}
-                className="w-full p-2 border border-gray-300 rounded-lg"
-            />
-            <input
-                value={setNameVal}
-                onChange={e => setSetNameVal(e.target.value)}
-                placeholder="Set name (optional)"
-                maxLength={35}
-                className="w-full p-2 border border-gray-300 rounded-lg"
-            />
-            <input
-                value={price}
-                onChange={e => setPrice(e.target.value)}
-                placeholder="Price (e.g. 12,50 or 12.50)"
-                className="w-full p-2 border border-gray-300 rounded-lg"
-            />
-            <input
-                type="url"
-                value={cardmarketUrl}
-                onChange={e => setCardmarketUrl(e.target.value)}
-                placeholder="Cardmarket URL (optional)"
-                className="w-full p-2 border border-gray-300 rounded-lg"
-            />
-            <select
-                value={selectedList}
-                onChange={e => setSelectedList(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-lg"
-            >
-                {lists.map(list => (
-                    <option key={list.id} value={list.name}>{list.name}</option>
-                ))}
-            </select>
-            <input
-                type="file"
-                accept="image/*"
-                onChange={e => setFile(e.target.files?.[0] ?? null)}
-                className="w-full p-2 border border-gray-300 rounded-lg"
-            />
+        <form onSubmit={onSubmit} className="space-y-4 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div>
+                <label className={labelClass}>Card name *</label>
+                <input
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                    placeholder="e.g. Charizard"
+                    required
+                    maxLength={32}
+                    className={inputClass}
+                />
+            </div>
+            <div>
+                <label className={labelClass}>Set name</label>
+                <input
+                    value={setNameVal}
+                    onChange={e => setSetNameVal(e.target.value)}
+                    placeholder="e.g. Base Set"
+                    maxLength={35}
+                    className={inputClass}
+                />
+            </div>
+            <div>
+                <label className={labelClass}>Price</label>
+                <input
+                    value={price}
+                    onChange={e => setPrice(e.target.value)}
+                    placeholder="e.g. 12,50"
+                    className={inputClass}
+                />
+            </div>
+            <div>
+                <label className={labelClass}>Cardmarket URL</label>
+                <input
+                    type="url"
+                    value={cardmarketUrl}
+                    onChange={e => setCardmarketUrl(e.target.value)}
+                    placeholder="https://www.cardmarket.com/..."
+                    className={inputClass}
+                />
+            </div>
+            <div>
+                <label className={labelClass}>List</label>
+                <div className="relative">
+                    <select
+                        value={selectedList}
+                        onChange={e => setSelectedList(e.target.value)}
+                        className={`${inputClass} bg-white appearance-none pr-9`}
+                    >
+                        {lists.map(list => (
+                            <option key={list.id} value={list.name}>{list.name}</option>
+                        ))}
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+                        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <label className={labelClass}>Card image</label>
+                <input
+                    type="file"
+                    accept="image/*"
+                    onChange={e => setFile(e.target.files?.[0] ?? null)}
+                    className="w-full text-sm text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-medium file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100 cursor-pointer"
+                />
+            </div>
             <button
                 disabled={loading}
                 type="submit"
-                className="w-full bg-blue-600 text-white py-2 px-4 rounded-full border border-blue-700 hover:bg-blue-700 disabled:bg-gray-400 transition-colors font-medium shadow-sm"
+                className="w-full bg-indigo-600 text-white py-2.5 px-4 rounded-full hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-semibold shadow-sm"
             >
-                {loading ? 'Adding...' : 'Add card'}
+                {loading ? 'Adding...' : 'Add Card'}
             </button>
         </form>
     );

@@ -96,7 +96,7 @@ export default function UpdateCardForm({ initialData, user, lists }: { initialDa
                     placeholder="Card name" 
                     required 
                     maxLength={32}
-                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
                 />
             </div>
             <div>
@@ -106,7 +106,7 @@ export default function UpdateCardForm({ initialData, user, lists }: { initialDa
                     onChange={e => setSetNameVal(e.target.value)} 
                     placeholder="Set name" 
                     maxLength={35}
-                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
                 />
             </div>
             <div>
@@ -116,7 +116,7 @@ export default function UpdateCardForm({ initialData, user, lists }: { initialDa
                     value={price} 
                     onChange={e => setPrice(e.target.value)} 
                     placeholder="Price (e.g. 12,50)"
-                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
                 />
             </div>
             <div>
@@ -126,37 +126,44 @@ export default function UpdateCardForm({ initialData, user, lists }: { initialDa
                     value={cardmarketUrl} 
                     onChange={e => setCardmarketUrl(e.target.value)} 
                     placeholder="https://..."
-                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
                 />
             </div>
             <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">List</label>
-                <select
-                    value={selectedList}
-                    onChange={e => setSelectedList(e.target.value)}
-                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                >
-                    {lists.map(list => (
-                        <option key={list.id} value={list.name}>{list.name}</option>
-                    ))}
-                </select>
+                <div className="relative">
+                    <select
+                        value={selectedList}
+                        onChange={e => setSelectedList(e.target.value)}
+                        className="w-full px-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all text-sm bg-white appearance-none pr-9"
+                    >
+                        {lists.map(list => (
+                            <option key={list.id} value={list.name}>{list.name}</option>
+                        ))}
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+                        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </div>
+                </div>
             </div>
             <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Image</label>
                 {initialData.image_path && (
                     <p className="text-xs text-gray-500 mb-2 truncate">Current: {initialData.image_path}</p>
                 )}
-                <input 
-                    type="file" 
-                    accept="image/*" 
+                <input
+                    type="file"
+                    accept="image/*"
                     onChange={e => setFile(e.target.files?.[0] ?? null)}
-                    className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                    className="w-full text-sm text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-medium file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100 cursor-pointer"
                 />
             </div>
             <button 
                 disabled={loading} 
                 type="submit"
-                className="w-full bg-blue-600 text-white py-2 px-4 rounded-full border border-blue-700 hover:bg-blue-700 disabled:bg-gray-400 transition-colors font-medium shadow-sm"
+                className="w-full bg-indigo-600 text-white py-2.5 px-4 rounded-full hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-semibold shadow-sm"
             >
                 {loading ? 'Saving...' : 'Save Changes'}
             </button>

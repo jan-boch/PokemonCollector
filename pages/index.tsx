@@ -15,7 +15,6 @@ export default function Home({ user, mode, setMode, activeList, lists, listsLoad
         let isMounted = true;
         async function loadData() {
             if (!user?.id || listsLoading) {
-                // Still waiting for lists to load — keep spinner
                 return;
             }
 
@@ -27,7 +26,6 @@ export default function Home({ user, mode, setMode, activeList, lists, listsLoad
                 return;
             }
 
-            // Only show full loading if the list has actually changed
             if (prevActiveList.current !== activeList) {
                 if (isMounted) setLoading(true);
             }
@@ -68,50 +66,79 @@ export default function Home({ user, mode, setMode, activeList, lists, listsLoad
 
     if (!user) {
         return (
-            <div className="text-center p-12 bg-white rounded-lg shadow-md">
-                <h2 className="text-3xl font-bold mb-4">Welcome to Your Pokémon Card Tracker!</h2>
-                <p className="text-lg text-gray-600 mb-2">
-                    Log in to start managing and viewing your personal collection.
+            <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+                <svg width="88" height="88" viewBox="0 0 80 80" fill="none" className="mb-8 drop-shadow-lg">
+                    <path d="M4 40a36 36 0 0 1 72 0" fill="#ef4444" />
+                    <path d="M4 40a36 36 0 0 0 72 0" fill="white" />
+                    <circle cx="40" cy="40" r="36" stroke="#1f2937" strokeWidth="3.5" />
+                    <line x1="4" y1="40" x2="76" y2="40" stroke="#1f2937" strokeWidth="3.5" />
+                    <circle cx="40" cy="40" r="11" fill="white" stroke="#1f2937" strokeWidth="3.5" />
+                    <circle cx="40" cy="40" r="5" fill="#1f2937" />
+                </svg>
+
+                <h2 className="text-4xl font-bold text-gray-900 mb-3">
+                    Pokémon Card Tracker
+                </h2>
+                <p className="text-gray-500 max-w-sm mb-8 leading-relaxed">
+                    Keep track of your entire collection — what you own and what you still need.
                 </p>
-                <p className="text-gray-500">
-                    You can sign in using the <strong>Login</strong> link in the header.
-                </p>
+
+                <button
+                    onClick={() => router.push('/login')}
+                    className="px-8 py-3 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold transition-colors shadow-md"
+                >
+                    Get Started →
+                </button>
             </div>
         );
     }
 
     if (loading) {
         return (
-            <div className="flex flex-col items-center justify-center py-20">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-                <p className="text-gray-500 font-medium">Loading your collection...</p>
+            <div className="flex flex-col items-center justify-center py-24">
+                <div className="animate-spin rounded-full h-10 w-10 border-2 border-gray-200 border-t-indigo-600 mb-4"></div>
+                <p className="text-sm text-gray-400 font-medium">Loading your collection…</p>
             </div>
         );
     }
 
+    const collectedCount = cards.filter(c => c.collected).length;
+    const totalCount = cards.length;
+    const progress = totalCount > 0 ? (collectedCount / totalCount) * 100 : 0;
+
     return (
-        <div className="py-6">
-            {cards.length === 0 ? (
-                <div className="text-center py-20 bg-white rounded-xl shadow-sm border border-gray-100">
-                    <div className="text-5xl mb-4">🎴</div>
-                    <h3 className="text-xl font-semibold text-gray-800 mb-2">Your collection is empty</h3>
-                    <p className="text-gray-500 mb-6">Start adding your favorite Pokémon cards to track them!</p>
+        <div className="py-2">
+            {totalCount === 0 ? (
+                <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-gray-100 shadow-sm">
+                    <svg width="56" height="56" viewBox="0 0 80 80" fill="none" className="mb-5 opacity-25">
+                        <path d="M4 40a36 36 0 0 1 72 0" fill="#6366f1" />
+                        <path d="M4 40a36 36 0 0 0 72 0" fill="white" />
+                        <circle cx="40" cy="40" r="36" stroke="#6366f1" strokeWidth="4" />
+                        <line x1="4" y1="40" x2="76" y2="40" stroke="#6366f1" strokeWidth="4" />
+                        <circle cx="40" cy="40" r="11" fill="white" stroke="#6366f1" strokeWidth="4" />
+                        <circle cx="40" cy="40" r="5" fill="#6366f1" />
+                    </svg>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-1">No cards yet</h3>
+                    <p className="text-sm text-gray-400 mb-6">Add your first card to start building this list.</p>
                     <button
                         onClick={() => router.push('/add')}
-                        className="inline-flex items-center px-6 py-3 rounded-full bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors font-medium shadow-md"
+                        className="px-6 py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold transition-colors shadow-sm"
                     >
-                        Add Your First Card
+                        + Add Your First Card
                     </button>
                 </div>
             ) : (
                 <>
-                    <div className="flex items-center justify-end mb-4 px-1">
-                        <span className="text-sm font-medium text-gray-500">
-                            Collected:&nbsp;
-                            <span className="text-blue-600 font-semibold">
-                                {cards.filter(c => c.collected).length}
-                            </span>
-                            <span className="text-gray-400"> / {cards.length}</span>
+                    <div className="flex items-center justify-end gap-3 mb-5 px-1">
+                        <div className="w-28 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                            <div
+                                className="h-full bg-indigo-500 rounded-full transition-all duration-500"
+                                style={{ width: `${progress}%` }}
+                            />
+                        </div>
+                        <span className="text-sm font-medium text-gray-500 tabular-nums">
+                            <span className="text-indigo-600 font-semibold">{collectedCount}</span>
+                            <span className="text-gray-400"> / {totalCount}</span>
                         </span>
                     </div>
                     <CardGrid

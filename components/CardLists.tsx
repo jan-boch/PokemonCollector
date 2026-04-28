@@ -47,33 +47,35 @@ export default function CardLists({ user, lists, setLists, activeList, setActive
     };
 
     return (
-        <div className="flex items-center px-4 bg-white border-b border-gray-200 overflow-x-auto no-scrollbar">
-            <div className="flex space-x-1">
+        <div className="bg-white border-b border-gray-100">
+            <div className="container mx-auto px-4 flex items-center overflow-x-auto no-scrollbar">
                 {lists.map(list => (
                     <button
                         key={list.id}
                         onClick={() => setActiveList(list.name)}
-                        className={`px-6 py-3 text-sm font-medium transition-all relative ${
+                        className={`px-5 py-3 text-sm font-medium transition-all whitespace-nowrap relative shrink-0 ${
                             activeList === list.name
-                                ? 'text-blue-600'
+                                ? 'text-indigo-600'
                                 : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
                         }`}
                     >
                         {list.name}
                         {activeList === list.name && (
-                            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />
+                            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 rounded-full" />
                         )}
                     </button>
                 ))}
+                <button
+                    onClick={addList}
+                    disabled={loading}
+                    className="ml-3 w-7 h-7 rounded-full bg-gray-100 text-gray-500 hover:bg-indigo-100 hover:text-indigo-600 transition-colors disabled:opacity-50 flex items-center justify-center shrink-0"
+                    title="Add new list"
+                >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                </button>
             </div>
-            <button
-                onClick={addList}
-                disabled={loading}
-                className="ml-4 p-1.5 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-800 transition-colors disabled:opacity-50"
-                title="Add new list"
-            >
-                +
-            </button>
         </div>
     );
 }
