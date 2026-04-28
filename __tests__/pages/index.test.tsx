@@ -49,7 +49,6 @@ const makeCard = (id: string, name: string): Card => ({
 
 const defaultProps = {
     mode: 'view' as const,
-    setMode: jest.fn(),
     activeList: 'Base',
     lists: mockLists,
     listsLoading: false,
@@ -62,7 +61,7 @@ describe('Home (index page)', () => {
 
     it('shows welcome message when user is not logged in', () => {
         render(<Home {...defaultProps} user={null} />);
-        expect(screen.getByText(/Welcome to Your Pokémon Card Tracker/i)).toBeInTheDocument();
+        expect(screen.getByText(/Pokémon Card Tracker/i)).toBeInTheDocument();
     });
 
     it('shows loading spinner while lists are loading', () => {
@@ -83,7 +82,7 @@ describe('Home (index page)', () => {
         render(<Home {...defaultProps} user={mockUser} />);
 
         await waitFor(() => {
-            expect(screen.getByText(/Your collection is empty/i)).toBeInTheDocument();
+            expect(screen.getByText(/No cards yet/i)).toBeInTheDocument();
         });
     });
 
@@ -110,7 +109,7 @@ describe('Home (index page)', () => {
         render(<Home {...defaultProps} user={mockUser} activeList="" />);
 
         await waitFor(() => {
-            expect(screen.getByText(/Your collection is empty/i)).toBeInTheDocument();
+            expect(screen.getByText(/No cards yet/i)).toBeInTheDocument();
         });
         expect(mockFrom).not.toHaveBeenCalled();
     });
@@ -119,7 +118,7 @@ describe('Home (index page)', () => {
         render(<Home {...defaultProps} user={mockUser} lists={[]} />);
 
         await waitFor(() => {
-            expect(screen.getByText(/Your collection is empty/i)).toBeInTheDocument();
+            expect(screen.getByText(/No cards yet/i)).toBeInTheDocument();
         });
         expect(mockFrom).not.toHaveBeenCalled();
     });

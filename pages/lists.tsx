@@ -8,6 +8,7 @@ export default function ManageLists({ user, lists, setLists, activeList, setActi
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editName, setEditName] = useState('');
     const [loading, setLoading] = useState(false);
+    const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
     const router = useRouter();
 
     if (!user) {
@@ -50,14 +51,7 @@ export default function ManageLists({ user, lists, setLists, activeList, setActi
     };
 
     const handleDelete = async (list: List) => {
-        if (lists.length <= 1) {
-            alert('You must have at least one list.');
-            return;
-        }
-
-        if (!window.confirm(`Delete "${list.name}"? Cards in this list will no longer appear in your collection.`)) {
-            return;
-        }
+        if (lists.length <= 1) return;
 
         setLoading(true);
         try {
@@ -70,8 +64,8 @@ export default function ManageLists({ user, lists, setLists, activeList, setActi
 
             const updatedLists = lists.filter(l => l.id !== list.id);
             setLists(updatedLists);
+            setConfirmDeleteId(null);
 
-            // If we deleted the active list, switch to another one
             if (activeList === list.name) setActiveList(updatedLists[0].name);
         } catch (error: unknown) {
             alert('Error deleting list: ' + (error instanceof Error ? error.message : JSON.stringify(error)));
@@ -119,6 +113,25 @@ export default function ManageLists({ user, lists, setLists, activeList, setActi
                                         Cancel
                                     </button>
                                 </div>
+                            ) : confirmDeleteId === list.id ? (
+                                <div className="flex items-center justify-between w-full">
+                                    <span className="text-sm text-red-600 font-medium">Delete &quot;{list.name}&quot;? Cards will no longer appear in your collection.</span>
+                                    <div className="flex items-center gap-2 ml-4 shrink-0">
+                                        <button
+                                            onClick={() => handleDelete(list)}
+                                            disabled={loading}
+                                            className="px-4 py-2 rounded-full bg-red-500 hover:bg-red-600 text-white text-sm font-medium transition-colors disabled:opacity-50"
+                                        >
+                                            Yes, delete
+                                        </button>
+                                        <button
+                                            onClick={() => setConfirmDeleteId(null)}
+                                            className="px-4 py-2 rounded-full bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium"
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </div>
                             ) : (
                                 <>
                                     <span className="text-lg font-medium text-gray-700">{list.name}</span>
@@ -129,12 +142,14 @@ export default function ManageLists({ user, lists, setLists, activeList, setActi
                                         >
                                             Rename
                                         </button>
-                                        <button
-                                            onClick={() => handleDelete(list)}
-                                            className="px-4 py-2 rounded-full bg-white border border-red-200 text-red-600 hover:bg-red-50 transition-colors text-sm font-medium"
-                                        >
-                                            Delete
-                                        </button>
+                                        {lists.length > 1 && (
+                                            <button
+                                                onClick={() => setConfirmDeleteId(list.id)}
+                                                className="px-4 py-2 rounded-full bg-white border border-red-200 text-red-600 hover:bg-red-50 transition-colors text-sm font-medium"
+                                            >
+                                                Delete
+                                            </button>
+                                        )}
                                     </div>
                                 </>
                             )}

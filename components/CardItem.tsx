@@ -28,6 +28,7 @@ export default function CardItem({ card, onUpdate, mode, onDelete }: CardItemPro
         : null;
     const { cardmarket_url } = card;
     const [updating, setUpdating] = useState(false);
+    const [pendingDelete, setPendingDelete] = useState(false);
 
     async function toggleCollected() {
         if (updating) return;
@@ -59,9 +60,9 @@ export default function CardItem({ card, onUpdate, mode, onDelete }: CardItemPro
             card.collected ? 'ring-2 ring-green-400' : 'ring-1 ring-gray-100'
         }`}>
 
-            {mode === 'delete' && (
+            {mode === 'delete' && !pendingDelete && (
                 <button
-                    onClick={() => onDelete(card.id)}
+                    onClick={() => setPendingDelete(true)}
                     className="absolute top-2 right-2 z-10 w-7 h-7 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-colors shadow"
                     title={`Delete ${card.name}`}
                 >
@@ -69,6 +70,22 @@ export default function CardItem({ card, onUpdate, mode, onDelete }: CardItemPro
                         <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
+            )}
+            {mode === 'delete' && pendingDelete && (
+                <div className="absolute top-2 right-2 z-10 flex items-center gap-1">
+                    <button
+                        onClick={() => { onDelete(card.id); setPendingDelete(false); }}
+                        className="px-2 py-1 bg-red-500 hover:bg-red-600 text-white text-xs font-semibold rounded-full transition-colors shadow"
+                    >
+                        Delete
+                    </button>
+                    <button
+                        onClick={() => setPendingDelete(false)}
+                        className="px-2 py-1 bg-white border border-gray-200 hover:bg-gray-50 text-gray-600 text-xs font-semibold rounded-full transition-colors shadow"
+                    >
+                        Cancel
+                    </button>
+                </div>
             )}
 
             {mode === 'edit' && (

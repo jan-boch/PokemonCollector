@@ -5,7 +5,7 @@ import CardGrid from '../components/CardGrid';
 import { useRouter } from 'next/router';
 import type { Card, List } from '../lib/types';
 
-export default function Home({ user, mode, setMode, activeList, lists, listsLoading }: { user: User | null, mode: 'view' | 'delete' | 'edit', setMode: (mode: 'view' | 'delete' | 'edit' ) => void, activeList: string, lists: List[], listsLoading: boolean }) {
+export default function Home({ user, mode, activeList, lists, listsLoading }: { user: User | null, mode: 'view' | 'delete' | 'edit', activeList: string, lists: List[], listsLoading: boolean }) {
     const [cards, setCards] = useState<Card[]>([]);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
@@ -144,7 +144,6 @@ export default function Home({ user, mode, setMode, activeList, lists, listsLoad
                     <CardGrid
                         initialCards={cards}
                         mode={mode}
-                        setMode={setMode}
                         setCards={setCards}
                     />
                 </>

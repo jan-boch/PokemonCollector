@@ -111,7 +111,7 @@ export default function App({ Component, pageProps }: AppProps) {
         <div className="min-h-screen bg-slate-50">
             <header className="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm">
                 <div className="container mx-auto px-4 py-3 flex justify-between items-center gap-4">
-                    <Link href="/" className="flex items-center gap-2.5 shrink-0 group">
+                    <Link href="/" className="flex items-center gap-2.5 shrink-0" title="Go to collection">
                         <svg width="28" height="28" viewBox="0 0 28 28" fill="none" className="shrink-0">
                             <path d="M1.5 14a12.5 12.5 0 0 1 25 0" fill="#ef4444" />
                             <path d="M1.5 14a12.5 12.5 0 0 0 25 0" fill="white" />
@@ -120,7 +120,7 @@ export default function App({ Component, pageProps }: AppProps) {
                             <circle cx="14" cy="14" r="4" fill="white" stroke="#1f2937" strokeWidth="1.5" />
                             <circle cx="14" cy="14" r="1.8" fill="#1f2937" />
                         </svg>
-                        <span className="text-lg font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">
+                        <span className="text-lg font-bold text-gray-900">
                             Pokémon Tracker
                         </span>
                     </Link>

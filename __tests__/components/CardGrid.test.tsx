@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor, act } from '@testing-library/react';
+import { render, screen, waitFor, act, fireEvent } from '@testing-library/react';
 import CardGrid from '../../components/CardGrid';
 import type { Card } from '../../lib/types';
 import { supabase } from '../../lib/supabaseClient';
@@ -76,25 +76,21 @@ const cards = [
 
 describe('CardGrid', () => {
     const setCards = jest.fn();
-    const setMode = jest.fn();
 
     beforeEach(() => {
         jest.clearAllMocks();
         capturedOnDragEnd = undefined;
-        window.confirm = jest.fn(() => true);
-        window.alert = jest.fn();
     });
 
     it('renders all provided cards', () => {
-        render(<CardGrid initialCards={cards} mode="view" setMode={setMode} setCards={setCards} />);
+        render(<CardGrid initialCards={cards} mode="view" setCards={setCards} />);
         expect(screen.getByText('Pikachu')).toBeInTheDocument();
         expect(screen.getByText('Charizard')).toBeInTheDocument();
         expect(screen.getByText('Mewtwo')).toBeInTheDocument();
     });
 
     it('renders empty grid without crashing when no cards are provided', () => {
-        render(<CardGrid initialCards={[]} mode="view" setMode={setMode} setCards={setCards} />);
-        // No error thrown, grid renders
+        render(<CardGrid initialCards={[]} mode="view" setCards={setCards} />);
         expect(screen.queryByRole('heading')).not.toBeInTheDocument();
     });
 
@@ -103,9 +99,8 @@ describe('CardGrid', () => {
         const mockUpdate = jest.fn().mockReturnValue({ eq: mockEq });
         mockFrom.mockReturnValue({ update: mockUpdate } as unknown as ReturnType<typeof supabase.from>);
 
-        render(<CardGrid initialCards={cards} mode="view" setMode={setMode} setCards={setCards} />);
+        render(<CardGrid initialCards={cards} mode="view" setCards={setCards} />);
 
-        // Simulate dragging card-1 over card-3 (position 0 → position 2)
         act(() => {
             capturedOnDragEnd!({
                 active: { id: 'card-1' },
@@ -114,18 +109,17 @@ describe('CardGrid', () => {
         });
 
         await waitFor(() => {
-            // 3 position updates expected (one per card)
             expect(mockUpdate).toHaveBeenCalledTimes(3);
         });
 
-        // After move: [Charizard, Mewtwo, Pikachu] — positions 0, 1, 2
+        // After move: [Charizard, Mewtwo, Pikachu]
         expect(mockEq).toHaveBeenCalledWith('id', 'card-2');
         expect(mockEq).toHaveBeenCalledWith('id', 'card-3');
         expect(mockEq).toHaveBeenCalledWith('id', 'card-1');
     });
 
     it('does nothing when drag ends on the same card', async () => {
-        render(<CardGrid initialCards={cards} mode="view" setMode={setMode} setCards={setCards} />);
+        render(<CardGrid initialCards={cards} mode="view" setCards={setCards} />);
 
         act(() => {
             capturedOnDragEnd!({
@@ -140,7 +134,7 @@ describe('CardGrid', () => {
     });
 
     it('does nothing when there is no over target', async () => {
-        render(<CardGrid initialCards={cards} mode="view" setMode={setMode} setCards={setCards} />);
+        render(<CardGrid initialCards={cards} mode="view" setCards={setCards} />);
 
         act(() => {
             capturedOnDragEnd!({
@@ -154,32 +148,31 @@ describe('CardGrid', () => {
         });
     });
 
-    it('deletes a card from supabase and updates state when confirmed', async () => {
+    it('shows inline confirm then deletes card when confirmed', async () => {
         const mockEq = jest.fn().mockResolvedValue({ error: null });
         const mockDelete = jest.fn().mockReturnValue({ eq: mockEq });
         mockFrom.mockReturnValue({ delete: mockDelete } as unknown as ReturnType<typeof supabase.from>);
 
-        render(<CardGrid initialCards={cards} mode="delete" setMode={setMode} setCards={setCards} />);
+        render(<CardGrid initialCards={cards} mode="delete" setCards={setCards} />);
 
-        const deleteButton = screen.getByTitle('Delete Pikachu');
-        deleteButton.click();
+        // First click shows inline confirm
+        fireEvent.click(screen.getByTitle('Delete Pikachu'));
+        const confirmButton = await screen.findByRole('button', { name: 'Delete' });
+        fireEvent.click(confirmButton);
 
         await waitFor(() => {
             expect(mockDelete).toHaveBeenCalled();
             expect(mockEq).toHaveBeenCalledWith('id', 'card-1');
-        });
-        await waitFor(() => {
             expect(setCards).toHaveBeenCalled();
         });
     });
 
-    it('does not delete when the user cancels the confirmation dialog', async () => {
-        window.confirm = jest.fn(() => false);
+    it('does not delete when the user cancels the inline confirm', async () => {
+        render(<CardGrid initialCards={cards} mode="delete" setCards={setCards} />);
 
-        render(<CardGrid initialCards={cards} mode="delete" setMode={setMode} setCards={setCards} />);
-
-        const deleteButton = screen.getByTitle('Delete Pikachu');
-        deleteButton.click();
+        fireEvent.click(screen.getByTitle('Delete Pikachu'));
+        const cancelButton = await screen.findByRole('button', { name: 'Cancel' });
+        fireEvent.click(cancelButton);
 
         await waitFor(() => {
             expect(mockFrom).not.toHaveBeenCalled();

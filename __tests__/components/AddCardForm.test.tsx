@@ -66,17 +66,17 @@ describe('AddCardForm', () => {
 
     it('renders the card name input', () => {
         render(<AddCardForm user={mockUser} lists={mockLists} activeList="Base" />);
-        expect(screen.getByPlaceholderText('Card name')).toBeInTheDocument();
+        expect(screen.getByPlaceholderText('e.g. Charizard')).toBeInTheDocument();
     });
 
     it('renders the set name input', () => {
         render(<AddCardForm user={mockUser} lists={mockLists} activeList="Base" />);
-        expect(screen.getByPlaceholderText('Set name (optional)')).toBeInTheDocument();
+        expect(screen.getByPlaceholderText('e.g. Base Set')).toBeInTheDocument();
     });
 
     it('renders the price input', () => {
         render(<AddCardForm user={mockUser} lists={mockLists} activeList="Base" />);
-        expect(screen.getByPlaceholderText(/Price/)).toBeInTheDocument();
+        expect(screen.getByPlaceholderText('e.g. 12,50')).toBeInTheDocument();
     });
 
     it('renders a list selector with all list names', () => {
@@ -99,12 +99,12 @@ describe('AddCardForm', () => {
 
     it('renders the submit button', () => {
         render(<AddCardForm user={mockUser} lists={mockLists} activeList="Base" />);
-        expect(screen.getByRole('button', { name: 'Add card' })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Add Card' })).toBeInTheDocument();
     });
 
     it('enforces maxLength of 32 on the card name input', () => {
         render(<AddCardForm user={mockUser} lists={mockLists} activeList="Base" />);
-        expect(screen.getByPlaceholderText('Card name')).toHaveAttribute('maxLength', '32');
+        expect(screen.getByPlaceholderText('e.g. Charizard')).toHaveAttribute('maxLength', '32');
     });
 
     // --- Submission ---
@@ -113,10 +113,10 @@ describe('AddCardForm', () => {
         setupInsertMock();
         render(<AddCardForm user={mockUser} lists={mockLists} activeList="Base" />);
 
-        fireEvent.change(screen.getByPlaceholderText('Card name'), { target: { value: 'Charizard' } });
-        fireEvent.change(screen.getByPlaceholderText('Set name (optional)'), { target: { value: 'Base Set' } });
-        fireEvent.change(screen.getByPlaceholderText(/Price/), { target: { value: '250' } });
-        fireEvent.submit(screen.getByRole('button', { name: 'Add card' }).closest('form')!);
+        fireEvent.change(screen.getByPlaceholderText('e.g. Charizard'), { target: { value: 'Charizard' } });
+        fireEvent.change(screen.getByPlaceholderText('e.g. Base Set'), { target: { value: 'Base Set' } });
+        fireEvent.change(screen.getByPlaceholderText('e.g. 12,50'), { target: { value: '250' } });
+        fireEvent.submit(screen.getByRole('button', { name: 'Add Card' }).closest('form')!);
 
         await waitFor(() => {
             expect(mockRouterPush).toHaveBeenCalledWith('/');
@@ -134,9 +134,9 @@ describe('AddCardForm', () => {
         setupInsertMock();
         render(<AddCardForm user={mockUser} lists={mockLists} activeList="Base" />);
 
-        fireEvent.change(screen.getByPlaceholderText('Card name'), { target: { value: 'Mew' } });
-        fireEvent.change(screen.getByPlaceholderText(/Price/), { target: { value: '12,50' } });
-        fireEvent.submit(screen.getByRole('button', { name: 'Add card' }).closest('form')!);
+        fireEvent.change(screen.getByPlaceholderText('e.g. Charizard'), { target: { value: 'Mew' } });
+        fireEvent.change(screen.getByPlaceholderText('e.g. 12,50'), { target: { value: '12,50' } });
+        fireEvent.submit(screen.getByRole('button', { name: 'Add Card' }).closest('form')!);
 
         await waitFor(() => {
             expect(mockRouterPush).toHaveBeenCalledWith('/');
@@ -150,9 +150,9 @@ describe('AddCardForm', () => {
         setupInsertMock();
         render(<AddCardForm user={mockUser} lists={mockLists} activeList="Base" />);
 
-        fireEvent.change(screen.getByPlaceholderText('Card name'), { target: { value: 'Mewtwo' } });
+        fireEvent.change(screen.getByPlaceholderText('e.g. Charizard'), { target: { value: 'Mewtwo' } });
         // price field left empty
-        fireEvent.submit(screen.getByRole('button', { name: 'Add card' }).closest('form')!);
+        fireEvent.submit(screen.getByRole('button', { name: 'Add Card' }).closest('form')!);
 
         await waitFor(() => {
             expect(mockRouterPush).toHaveBeenCalledWith('/');
@@ -166,9 +166,9 @@ describe('AddCardForm', () => {
         setupInsertMock();
         render(<AddCardForm user={mockUser} lists={mockLists} activeList="Base" />);
 
-        fireEvent.change(screen.getByPlaceholderText('Card name'), { target: { value: 'Bulbasaur' } });
-        fireEvent.change(screen.getByPlaceholderText(/Price/), { target: { value: 'abc' } });
-        fireEvent.submit(screen.getByRole('button', { name: 'Add card' }).closest('form')!);
+        fireEvent.change(screen.getByPlaceholderText('e.g. Charizard'), { target: { value: 'Bulbasaur' } });
+        fireEvent.change(screen.getByPlaceholderText('e.g. 12,50'), { target: { value: 'abc' } });
+        fireEvent.submit(screen.getByRole('button', { name: 'Add Card' }).closest('form')!);
 
         await waitFor(() => {
             expect(mockRouterPush).toHaveBeenCalledWith('/');
@@ -182,8 +182,8 @@ describe('AddCardForm', () => {
         setupInsertMock();
         render(<AddCardForm user={mockUser} lists={mockLists} activeList="Base" />);
 
-        fireEvent.change(screen.getByPlaceholderText('Card name'), { target: { value: 'Squirtle' } });
-        fireEvent.submit(screen.getByRole('button', { name: 'Add card' }).closest('form')!);
+        fireEvent.change(screen.getByPlaceholderText('e.g. Charizard'), { target: { value: 'Squirtle' } });
+        fireEvent.submit(screen.getByRole('button', { name: 'Add Card' }).closest('form')!);
 
         await waitFor(() => {
             expect(mockRouterPush).toHaveBeenCalledWith('/');
@@ -202,8 +202,8 @@ describe('AddCardForm', () => {
 
         render(<AddCardForm user={mockUser} lists={mockLists} activeList="Base" />);
 
-        fireEvent.change(screen.getByPlaceholderText('Card name'), { target: { value: 'Gengar' } });
-        fireEvent.submit(screen.getByRole('button', { name: 'Add card' }).closest('form')!);
+        fireEvent.change(screen.getByPlaceholderText('e.g. Charizard'), { target: { value: 'Gengar' } });
+        fireEvent.submit(screen.getByRole('button', { name: 'Add Card' }).closest('form')!);
 
         await waitFor(() => {
             expect(mockRouterPush).toHaveBeenCalledWith('/');
@@ -228,8 +228,8 @@ describe('AddCardForm', () => {
         } as unknown as ReturnType<typeof supabase.from>));
 
         render(<AddCardForm user={mockUser} lists={mockLists} activeList="Base" />);
-        fireEvent.change(screen.getByPlaceholderText('Card name'), { target: { value: 'Jigglypuff' } });
-        fireEvent.submit(screen.getByRole('button', { name: 'Add card' }).closest('form')!);
+        fireEvent.change(screen.getByPlaceholderText('e.g. Charizard'), { target: { value: 'Jigglypuff' } });
+        fireEvent.submit(screen.getByRole('button', { name: 'Add Card' }).closest('form')!);
 
         await waitFor(() => {
             expect(window.alert).toHaveBeenCalledWith(expect.stringContaining('Insert error'));
