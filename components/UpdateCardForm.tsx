@@ -77,7 +77,6 @@ export default function UpdateCardForm({ initialData, user, lists }: { initialDa
 
             if (error) throw error;
 
-            alert('Card updated successfully!');
             router.push('/');
         } catch (err: unknown) {
             alert(err instanceof Error ? err.message : JSON.stringify(err));

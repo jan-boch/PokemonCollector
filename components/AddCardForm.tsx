@@ -65,7 +65,6 @@ export default function AddCardForm({ user, lists, activeList }: { user: User, l
 
             if (error) throw error;
 
-            alert('Card added');
             setName(''); setSetNameVal(''); setPrice(''); setFile(null);
             router.push('/');
         } catch (err: unknown) {

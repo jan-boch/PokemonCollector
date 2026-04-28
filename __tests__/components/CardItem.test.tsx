@@ -34,6 +34,10 @@ describe('CardItem', () => {
     const onUpdate = jest.fn();
     const onDelete = jest.fn();
 
+    beforeAll(() => {
+        process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';
+    });
+
     beforeEach(() => {
         jest.clearAllMocks();
         window.alert = jest.fn();
@@ -54,13 +58,12 @@ describe('CardItem', () => {
     it('formats price with EUR and comma decimal separator', () => {
         render(<CardItem card={baseCard} onUpdate={onUpdate} mode="view" onDelete={onDelete} />);
         // de-DE locale formats 12.5 as "12,50 €"
-        const priceEl = screen.getByText(/Price:/);
-        expect(priceEl.textContent).toMatch(/12,50/);
+        expect(screen.getByText(/12,50/)).toBeInTheDocument();
     });
 
     it('shows "-" for null price', () => {
         render(<CardItem card={{ ...baseCard, price: null }} onUpdate={onUpdate} mode="view" onDelete={onDelete} />);
-        expect(screen.getByText('Price: -')).toBeInTheDocument();
+        expect(screen.getByText('-')).toBeInTheDocument();
     });
 
     it('shows "No image" when image_path is null', () => {
@@ -71,7 +74,7 @@ describe('CardItem', () => {
     it('wraps image with cardmarket link when cardmarket_url is set', () => {
         render(
             <CardItem
-                card={{ ...baseCard, cardmarket_url: 'https://cardmarket.com/pikachu' }}
+                card={{ ...baseCard, image_path: 'user-1/pikachu.jpg', cardmarket_url: 'https://cardmarket.com/pikachu' }}
                 onUpdate={onUpdate}
                 mode="view"
                 onDelete={onDelete}
@@ -110,9 +113,10 @@ describe('CardItem', () => {
         expect(screen.getByTitle('Delete Pikachu')).toBeInTheDocument();
     });
 
-    it('calls onDelete with card.id when delete button is clicked', () => {
+    it('calls onDelete with card.id when inline confirm is accepted', async () => {
         render(<CardItem card={baseCard} onUpdate={onUpdate} mode="delete" onDelete={onDelete} />);
         fireEvent.click(screen.getByTitle('Delete Pikachu'));
+        fireEvent.click(await screen.findByRole('button', { name: 'Delete' }));
         expect(onDelete).toHaveBeenCalledWith('card-1');
     });
 

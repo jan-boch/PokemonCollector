@@ -101,8 +101,7 @@ describe('CardLists', () => {
         expect(mockFrom).not.toHaveBeenCalled();
     });
 
-    it('shows alert and does not call supabase for a duplicate list name', () => {
-        (window.prompt as jest.Mock).mockReturnValue('Base'); // already exists
+    it('shows inline error and does not call supabase for a duplicate list name', async () => {
         render(
             <CardLists
                 user={mockUser}
@@ -113,14 +112,15 @@ describe('CardLists', () => {
             />
         );
         fireEvent.click(screen.getByTitle('Add new list'));
-        expect(window.alert).toHaveBeenCalledWith('A list with this name already exists.');
+        const input = screen.getByPlaceholderText('List name');
+        fireEvent.change(input, { target: { value: 'Base' } });
+        fireEvent.submit(input.closest('form')!);
+        expect(await screen.findByText('A list with this name already exists.')).toBeInTheDocument();
         expect(mockFrom).not.toHaveBeenCalled();
     });
 
     it('inserts new list in supabase and updates state on success', async () => {
-        (window.prompt as jest.Mock).mockReturnValue('Fossil');
         const newList = { id: 'list-3', name: 'Fossil' };
-
         mockFrom.mockReturnValue({
             insert: jest.fn().mockReturnValue({
                 select: jest.fn().mockReturnValue({
@@ -139,21 +139,17 @@ describe('CardLists', () => {
             />
         );
         fireEvent.click(screen.getByTitle('Add new list'));
+        const input = screen.getByPlaceholderText('List name');
+        fireEvent.change(input, { target: { value: 'Fossil' } });
+        fireEvent.submit(input.closest('form')!);
 
-        await waitFor(() => {
-            expect(mockFrom).toHaveBeenCalledWith('lists');
-        });
-        await waitFor(() => {
-            expect(setActiveList).toHaveBeenCalledWith('Fossil');
-        });
-        await waitFor(() => {
-            expect(setLists).toHaveBeenCalled();
-        });
+        await waitFor(() => expect(mockFrom).toHaveBeenCalledWith('lists'));
+        await waitFor(() => expect(setActiveList).toHaveBeenCalledWith('Fossil'));
+        await waitFor(() => expect(setLists).toHaveBeenCalled());
     });
 
-    it('shows alert when supabase returns an error on insert', async () => {
+    it('shows inline error when supabase returns an error on insert', async () => {
         const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-        (window.prompt as jest.Mock).mockReturnValue('ErrorList');
         mockFrom.mockReturnValue({
             insert: jest.fn().mockReturnValue({
                 select: jest.fn().mockReturnValue({
@@ -172,9 +168,12 @@ describe('CardLists', () => {
             />
         );
         fireEvent.click(screen.getByTitle('Add new list'));
+        const input = screen.getByPlaceholderText('List name');
+        fireEvent.change(input, { target: { value: 'ErrorList' } });
+        fireEvent.submit(input.closest('form')!);
 
         await waitFor(() => {
-            expect(window.alert).toHaveBeenCalledWith(expect.stringContaining('Insert failed'));
+            expect(screen.getByText('Insert failed')).toBeInTheDocument();
         });
         expect(setLists).not.toHaveBeenCalled();
         consoleErrorSpy.mockRestore();

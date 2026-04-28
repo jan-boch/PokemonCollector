@@ -21,7 +21,6 @@ import type { Card } from '../lib/types';
 interface CardGridProps {
     initialCards: Card[];
     mode: 'view' | 'delete' | 'edit';
-    setMode: (mode: 'view' | 'delete' | 'edit') => void;
     setCards: React.Dispatch<React.SetStateAction<Card[]>>;
 }
 
@@ -54,7 +53,7 @@ function SortableCard({ card, mode, onUpdate, onDelete }: {
     );
 }
 
-export default function CardGrid({ initialCards, mode, setMode, setCards }: CardGridProps) {
+export default function CardGrid({ initialCards, mode, setCards }: CardGridProps) {
     const [cards, setCardsState] = useState(initialCards);
 
     useEffect(() => {
@@ -74,20 +73,14 @@ export default function CardGrid({ initialCards, mode, setMode, setCards }: Card
     }
 
     async function deleteCard(cardId: string) {
-        if (!window.confirm("Are you sure you want to delete this card?")) return;
-
         const { error } = await supabase.from('cards').delete().eq('id', cardId);
         if (error) {
             console.error(error);
-            alert('Error deleting card: ' + error.message);
             return;
         }
-
         const newCards = cards.filter(c => c.id !== cardId);
         setCardsState(newCards);
         setCards(newCards);
-        alert('Card deleted successfully!');
-        setMode('view');
     }
 
     async function handleDragEnd(event: DragEndEvent) {
