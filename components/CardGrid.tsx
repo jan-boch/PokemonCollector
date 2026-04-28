@@ -40,11 +40,10 @@ function SortableCard({ card, mode, onUpdate, onDelete }: {
         transform: CSS.Transform.toString(transform),
         transition,
         opacity: isDragging ? 0.5 : 1,
-        cursor: mode === 'view' ? 'grab' : 'default',
     };
 
     return (
-        <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+        <div ref={setNodeRef} style={style} className={mode === 'view' ? 'cursor-grab active:cursor-grabbing' : ''} {...attributes} {...listeners}>
             <CardItem
                 card={card}
                 onUpdate={onUpdate}
@@ -112,7 +111,7 @@ export default function CardGrid({ initialCards, mode, setMode, setCards }: Card
     return (
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
             <SortableContext items={cards.map(c => c.id)} strategy={rectSortingStrategy}>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))', gap: 16 }}>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                     {cards.map(card => (
                         <SortableCard
                             key={card.id}
