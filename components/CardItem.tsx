@@ -7,23 +7,15 @@ import type { Card } from '../lib/types';
 interface CardItemProps {
     card: Card;
     onUpdate: (c: Card) => void;
-    mode: 'view' | 'delete' | 'edit'; // New prop
-    onDelete: (id: string) => void; // New prop
+    mode: 'view' | 'delete' | 'edit';
+    onDelete: (id: string) => void;
 }
 
-// Function to format the price
 function formatPrice(price: number | null): string {
-    if (price === null || price === undefined) {
-        return '-';
-    }
-
-    // Use Intl.NumberFormat for currency formatting
-    // 'de-DE' locale is a common European locale that uses comma (,) for decimals
-    // 'EUR' is the currency code
+    if (price === null || price === undefined) return '-';
     return new Intl.NumberFormat('de-DE', {
         style: 'currency',
         currency: 'EUR',
-        // This ensures two decimal places (e.g., 7,00 €)
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
     }).format(price);
@@ -51,102 +43,88 @@ export default function CardItem({ card, onUpdate, mode, onDelete }: CardItemPro
         onUpdate(data);
     }
 
-    // Image element definition
-    const ImageElement = imageUrl ? (
+    const cardImage = imageUrl ? (
         <Image
             src={imageUrl}
             alt={card.name}
             unoptimized
-            width={230}
-            height={230}
-            style={{
-                maxWidth: '100%',
-                maxHeight: 230,
-                height: 'auto',
-                width: 'auto',
-                objectFit: 'contain'
-            }}
+            fill
+            sizes="(max-width: 640px) 50vw, (max-width: 1280px) 25vw, 20vw"
+            className="object-contain p-2"
         />
-    ) : (
-        <div>No image</div>
-    );
+    ) : null;
 
     return (
-        <div style={{ border: '1px solid #ddd', padding: 12, borderRadius: 8, position: 'relative' }}>
+        <div className={`relative bg-white rounded-2xl overflow-hidden flex flex-col shadow-sm hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 ${
+            card.collected ? 'ring-2 ring-green-400' : 'ring-1 ring-gray-100'
+        }`}>
 
-            {/* --- DELETE Button --- */}
             {mode === 'delete' && (
                 <button
                     onClick={() => onDelete(card.id)}
-                    style={{
-                        position: 'absolute',
-                        top: 5,
-                        right: 5,
-                        background: 'red',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '50%',
-                        width: 20,
-                        height: 20,
-                        lineHeight: '18px',
-                        cursor: 'pointer',
-                        fontWeight: 'bold',
-                        padding: 0,
-                        zIndex: 10
-                    }}
+                    className="absolute top-2 right-2 z-10 w-7 h-7 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-colors shadow"
                     title={`Delete ${card.name}`}
                 >
-                    &times;
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                 </button>
             )}
 
-            {/* --- EDIT Button (Link) --- */}
             {mode === 'edit' && (
-                // Use a Link to navigate to a new update page, passing the card ID
                 <Link
                     href={`/update/${card.id}`}
-                    style={{
-                        position: 'absolute',
-                        top: 5,
-                        right: 5,
-                        width: 20,
-                        height: 20,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: 'pointer',
-                        padding: 0,
-                        zIndex: 10,
-                        color: 'inherit',
-                        textDecoration: 'none'
-                    }}
+                    className="absolute top-2 right-2 z-10 w-7 h-7 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full flex items-center justify-center transition-colors shadow"
                     title={`Edit ${card.name}`}
                 >
-                    ✏️
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
                 </Link>
             )}
 
-            <div style={{ minHeight: 140, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                {cardmarket_url ? (
-                    <a href={cardmarket_url} target="_blank" rel="noopener noreferrer" style={{ cursor: 'pointer' }}>
-                        {ImageElement}
-                    </a>
+            <div className="relative h-52 bg-gray-50">
+                {imageUrl ? (
+                    cardmarket_url ? (
+                        <a href={cardmarket_url} target="_blank" rel="noopener noreferrer" className="absolute inset-0">
+                            {cardImage}
+                        </a>
+                    ) : (
+                        cardImage
+                    )
                 ) : (
-                    ImageElement
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 text-gray-300">
+                        <svg className="w-10 h-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                            <circle cx="12" cy="12" r="10" />
+                            <path d="M2 12h20" />
+                            <circle cx="12" cy="12" r="3" />
+                        </svg>
+                        <span className="text-xs font-medium">No image</span>
+                    </div>
                 )}
             </div>
-            <h3>{card.name}</h3>
-            <div>{card.set_name}</div>
-            <div>Price: {formatPrice(card.price)}</div>
-            <label style={{ display: 'block', marginTop: 8 }}>
-                {/* Collected checkbox should only be editable in 'view' or 'edit' mode */}
-                <input
-                    type="checkbox"
-                    checked={card.collected}
-                    onChange={toggleCollected}
-                    disabled={mode === 'delete' || updating}
-                /> Collected
-            </label>
+
+            <div className="px-3 pb-3 pt-2 flex flex-col flex-1">
+                <h3 className="font-semibold text-gray-900 text-sm leading-snug line-clamp-2">{card.name}</h3>
+                {card.set_name && (
+                    <p className="text-xs text-gray-400 mt-0.5 truncate">{card.set_name}</p>
+                )}
+                <div className="mt-auto pt-2 flex items-center justify-between">
+                    <span className="text-sm font-bold text-gray-800">{formatPrice(card.price)}</span>
+                    <label className="flex items-center gap-1.5 cursor-pointer select-none">
+                        <input
+                            type="checkbox"
+                            checked={card.collected}
+                            onChange={toggleCollected}
+                            disabled={mode === 'delete' || updating}
+                            className="w-4 h-4 accent-green-500 cursor-pointer disabled:cursor-not-allowed"
+                        />
+                        <span className={`text-xs font-medium ${card.collected ? 'text-green-600' : 'text-gray-400'}`}>
+                            {card.collected ? 'Got it' : 'Want it'}
+                        </span>
+                    </label>
+                </div>
+            </div>
         </div>
     );
 }

@@ -108,52 +108,65 @@ export default function App({ Component, pageProps }: AppProps) {
     };
 
     return (
-        <div className="min-h-screen bg-gray-100">
-            <header className="bg-white shadow-md">
-                <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-                    <h1 className="text-2xl font-bold">
-                        <Link href="/" className="text-gray-800 hover:text-gray-600">
-                            Pokémon Collection
-                        </Link>
-                    </h1>
-                    <nav className="flex items-center space-x-2">
+        <div className="min-h-screen bg-slate-50">
+            <header className="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm">
+                <div className="container mx-auto px-4 py-3 flex justify-between items-center gap-4">
+                    <Link href="/" className="flex items-center gap-2.5 shrink-0 group">
+                        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" className="shrink-0">
+                            <path d="M1.5 14a12.5 12.5 0 0 1 25 0" fill="#ef4444" />
+                            <path d="M1.5 14a12.5 12.5 0 0 0 25 0" fill="white" />
+                            <circle cx="14" cy="14" r="12.5" stroke="#1f2937" strokeWidth="1.5" />
+                            <line x1="1.5" y1="14" x2="26.5" y2="14" stroke="#1f2937" strokeWidth="1.5" />
+                            <circle cx="14" cy="14" r="4" fill="white" stroke="#1f2937" strokeWidth="1.5" />
+                            <circle cx="14" cy="14" r="1.8" fill="#1f2937" />
+                        </svg>
+                        <span className="text-lg font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">
+                            Pokémon Tracker
+                        </span>
+                    </Link>
+
+                    <nav className="flex items-center gap-2">
                         {user ? (
                             <>
                                 <button
                                     onClick={() => router.push('/add')}
-                                    className="px-4 py-2 rounded-full bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors font-medium text-sm shadow-sm"
+                                    className="px-4 py-2 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold transition-colors shadow-sm"
                                 >
-                                    Add Card
+                                    + Add Card
                                 </button>
+
+                                <div className="flex rounded-full border border-gray-200 divide-x divide-gray-200 overflow-hidden">
+                                    <button
+                                        onClick={() => setModeHandler('edit')}
+                                        className={`px-3 py-1.5 text-sm font-medium transition-colors ${
+                                            mode === 'edit'
+                                                ? 'bg-indigo-600 text-white'
+                                                : 'text-gray-600 hover:bg-gray-50'
+                                        }`}
+                                    >
+                                        Edit
+                                    </button>
+                                    <button
+                                        onClick={() => setModeHandler('delete')}
+                                        className={`px-3 py-1.5 text-sm font-medium transition-colors ${
+                                            mode === 'delete'
+                                                ? 'bg-red-500 text-white'
+                                                : 'text-gray-600 hover:bg-gray-50'
+                                        }`}
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
+
                                 <button
                                     onClick={() => router.push('/lists')}
-                                    className="px-4 py-2 rounded-full bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors font-medium text-sm shadow-sm"
+                                    className="px-3 py-1.5 text-sm font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-full transition-colors"
                                 >
-                                    Edit Lists
-                                </button>
-                                <button
-                                    onClick={() => setModeHandler('edit')}
-                                    className={`px-4 py-2 rounded-full transition-colors font-medium text-sm shadow-sm ${
-                                        mode === 'edit'
-                                            ? 'bg-blue-600 text-white border border-blue-600'
-                                            : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-                                    }`}
-                                >
-                                    Edit
-                                </button>
-                                <button
-                                    onClick={() => setModeHandler('delete')}
-                                    className={`px-4 py-2 rounded-full transition-colors font-medium text-sm shadow-sm ${
-                                        mode === 'delete'
-                                            ? 'bg-red-600 text-white border border-red-600'
-                                            : 'bg-white border border-gray-300 text-red-600 hover:bg-red-50'
-                                    }`}
-                                >
-                                    Delete
+                                    Lists
                                 </button>
                                 <button
                                     onClick={logout}
-                                    className="px-4 py-2 rounded-full bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors font-medium text-sm shadow-sm"
+                                    className="px-3 py-1.5 text-sm font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-full transition-colors"
                                 >
                                     Logout
                                 </button>
@@ -161,7 +174,7 @@ export default function App({ Component, pageProps }: AppProps) {
                         ) : (
                             <button
                                 onClick={() => router.push('/login')}
-                                className="px-4 py-2 rounded-full bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors font-medium text-sm shadow-sm"
+                                className="px-4 py-2 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold transition-colors shadow-sm"
                             >
                                 Login
                             </button>
@@ -169,6 +182,7 @@ export default function App({ Component, pageProps }: AppProps) {
                     </nav>
                 </div>
             </header>
+
             {user && (
                 <CardLists
                     user={user}
@@ -178,6 +192,7 @@ export default function App({ Component, pageProps }: AppProps) {
                     setActiveList={handleSetActiveList}
                 />
             )}
+
             <main className="container mx-auto px-4 md:px-8 lg:px-16 py-8">
                 <Component
                     {...pageProps}

@@ -55,7 +55,7 @@ export default function ManageLists({ user, lists, setLists, activeList, setActi
             return;
         }
 
-        if (!window.confirm(`Are you sure you want to delete the list "${list.name}"? All cards in this list will also be deleted.`)) {
+        if (!window.confirm(`Delete "${list.name}"? Cards in this list will no longer appear in your collection.`)) {
             return;
         }
 
@@ -102,13 +102,13 @@ export default function ManageLists({ user, lists, setLists, activeList, setActi
                                         type="text"
                                         value={editName}
                                         onChange={(e) => setEditName(e.target.value)}
-                                        className="flex-grow p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                        className="flex-grow px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm"
                                         autoFocus
                                     />
                                     <button
                                         onClick={() => handleRename(list.id)}
                                         disabled={loading}
-                                        className="px-3 py-1.5 bg-blue-600 text-white rounded-full text-xs font-medium hover:bg-blue-700 disabled:bg-gray-400"
+                                        className="px-3 py-1.5 bg-indigo-600 text-white rounded-full text-xs font-medium hover:bg-indigo-700 disabled:bg-gray-300"
                                     >
                                         Save
                                     </button>
@@ -142,8 +142,8 @@ export default function ManageLists({ user, lists, setLists, activeList, setActi
                     ))}
                 </ul>
             </div>
-            <p className="mt-4 text-sm text-gray-500 italic">
-                Note: Deleting a list will also delete all Pokémon cards assigned to that list.
+            <p className="mt-4 text-sm text-gray-400">
+                Cards in a deleted list are not removed from the database but will no longer appear in your collection.
             </p>
         </div>
     );
