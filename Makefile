@@ -1,4 +1,4 @@
-.PHONY: help run build start lint db-start db-stop db-mail db-login db-up db-push db-reset db-studio
+.PHONY: help run build start lint test db-start db-stop db-mail db-login db-up db-push db-reset db-studio
 
 SUPABASE_PROJECT_REF=gdooocbtquidgvyymash
 
@@ -8,6 +8,7 @@ help:
 	@echo   build        - Build for production
 	@echo   start        - Start the production server
 	@echo   lint         - Run ESLint
+	@echo   test         - Run all tests
 	@echo   db-start     - Start local Supabase instance
 	@echo   db-stop      - Stop local Supabase instance
 	@echo   db-mail      - Open local email inbox (Mailpit)
@@ -16,6 +17,9 @@ help:
 	@echo   db-push      - Apply pending migrations to remote DB only
 	@echo   db-reset     - Wipe and recreate local DB from scratch (destroys local data)
 	@echo   db-studio    - Open local Supabase Studio (table editor, SQL runner)
+
+test:
+	npm test
 
 run:
 	npm run dev

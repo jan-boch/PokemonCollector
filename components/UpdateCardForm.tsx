@@ -95,7 +95,7 @@ export default function UpdateCardForm({ initialData, user, lists }: { initialDa
                     onChange={e => setName(e.target.value)} 
                     placeholder="Card name" 
                     required 
-                    maxLength={24}
+                    maxLength={32}
                     className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                 />
             </div>

@@ -104,12 +104,23 @@ export default function Home({ user, mode, setMode, activeList, lists, listsLoad
                     </button>
                 </div>
             ) : (
-                <CardGrid
-                    initialCards={cards}
-                    mode={mode}
-                    setMode={setMode}
-                    setCards={setCards}
-                />
+                <>
+                    <div className="flex items-center justify-end mb-4 px-1">
+                        <span className="text-sm font-medium text-gray-500">
+                            Collected:&nbsp;
+                            <span className="text-blue-600 font-semibold">
+                                {cards.filter(c => c.collected).length}
+                            </span>
+                            <span className="text-gray-400"> / {cards.length}</span>
+                        </span>
+                    </div>
+                    <CardGrid
+                        initialCards={cards}
+                        mode={mode}
+                        setMode={setMode}
+                        setCards={setCards}
+                    />
+                </>
             )}
         </div>
     );
