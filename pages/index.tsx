@@ -1,15 +1,31 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
 import CardGrid from '../components/CardGrid';
 import { useRouter } from 'next/router';
 import type { Card, List } from '../lib/types';
+import { sortCards, SORT_OPTIONS } from '../lib/sortCards';
+import type { SortField } from '../lib/sortCards';
 
 export default function Home({ user, mode, activeList, lists, listsLoading }: { user: User | null, mode: 'view' | 'delete' | 'edit', activeList: string, lists: List[], listsLoading: boolean }) {
     const [cards, setCards] = useState<Card[]>([]);
     const [loading, setLoading] = useState(true);
+    const [sortBy, setSortBy] = useState<SortField>('position');
+    const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+    const [sortOpen, setSortOpen] = useState(false);
+    const sortRef = useRef<HTMLDivElement>(null);
     const router = useRouter();
     const prevActiveList = React.useRef(activeList);
+
+    useEffect(() => {
+        function handleClickOutside(e: MouseEvent) {
+            if (sortRef.current && !sortRef.current.contains(e.target as Node)) {
+                setSortOpen(false);
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     useEffect(() => {
         let isMounted = true;
@@ -105,6 +121,7 @@ export default function Home({ user, mode, activeList, lists, listsLoading }: { 
     const collectedCount = cards.filter(c => c.collected).length;
     const totalCount = cards.length;
     const progress = totalCount > 0 ? (collectedCount / totalCount) * 100 : 0;
+    const displayCards = sortCards(cards, sortBy, sortDir);
 
     return (
         <div className="py-2">
@@ -129,22 +146,75 @@ export default function Home({ user, mode, activeList, lists, listsLoading }: { 
                 </div>
             ) : (
                 <>
-                    <div className="flex items-center justify-end gap-3 mb-5 px-1">
-                        <div className="w-28 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                            <div
-                                className="h-full bg-indigo-500 rounded-full transition-all duration-500"
-                                style={{ width: `${progress}%` }}
-                            />
+                    <div className="flex items-center justify-between gap-3 mb-5 px-1">
+                        <div className="flex items-center gap-2">
+                            <div className="relative" ref={sortRef}>
+                                <button
+                                    onClick={() => setSortOpen(o => !o)}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-full hover:bg-gray-50 transition-colors"
+                                >
+                                    <svg className="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 7h18M6 12h12M10 17h4" />
+                                    </svg>
+                                    <span>{SORT_OPTIONS.find(o => o.value === sortBy)?.label}</span>
+                                    <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </button>
+                                {sortOpen && (
+                                    <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg py-1 z-20 min-w-max">
+                                        {SORT_OPTIONS.map(option => (
+                                            <button
+                                                key={option.value}
+                                                onClick={() => { setSortBy(option.value); setSortOpen(false); }}
+                                                className={`w-full text-left px-4 py-2 text-sm transition-colors ${
+                                                    sortBy === option.value
+                                                        ? 'text-indigo-600 font-semibold bg-indigo-50'
+                                                        : 'text-gray-700 hover:bg-gray-50'
+                                                }`}
+                                            >
+                                                {option.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                            {sortBy !== 'position' && (
+                                <button
+                                    onClick={() => setSortDir(d => d === 'asc' ? 'desc' : 'asc')}
+                                    className="w-8 h-8 flex items-center justify-center text-gray-500 bg-white border border-gray-200 rounded-full hover:bg-gray-50 transition-colors"
+                                    title={sortDir === 'asc' ? 'Ascending' : 'Descending'}
+                                >
+                                    {sortDir === 'asc' ? (
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h13M3 8h9M3 12h9m2-4l-4-4m4 4l-4 4" />
+                                        </svg>
+                                    ) : (
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h13M3 8h9M3 12h9m2 4l-4 4m4-4l-4-4" />
+                                        </svg>
+                                    )}
+                                </button>
+                            )}
                         </div>
-                        <span className="text-sm font-medium text-gray-500 tabular-nums">
-                            <span className="text-indigo-600 font-semibold">{collectedCount}</span>
-                            <span className="text-gray-400"> / {totalCount}</span>
-                        </span>
+                        <div className="flex items-center gap-3">
+                            <div className="w-28 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                                <div
+                                    className="h-full bg-indigo-500 rounded-full transition-all duration-500"
+                                    style={{ width: `${progress}%` }}
+                                />
+                            </div>
+                            <span className="text-sm font-medium text-gray-500 tabular-nums">
+                                <span className="text-indigo-600 font-semibold">{collectedCount}</span>
+                                <span className="text-gray-400"> / {totalCount}</span>
+                            </span>
+                        </div>
                     </div>
                     <CardGrid
-                        initialCards={cards}
+                        initialCards={displayCards}
                         mode={mode}
                         setCards={setCards}
+                        disableDrag={sortBy !== 'position'}
                     />
                 </>
             )}
