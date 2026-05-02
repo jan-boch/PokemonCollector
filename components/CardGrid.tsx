@@ -22,17 +22,19 @@ interface CardGridProps {
     initialCards: Card[];
     mode: 'view' | 'delete' | 'edit';
     setCards: React.Dispatch<React.SetStateAction<Card[]>>;
+    disableDrag?: boolean;
 }
 
-function SortableCard({ card, mode, onUpdate, onDelete }: {
+function SortableCard({ card, mode, disableDrag, onUpdate, onDelete }: {
     card: Card;
     mode: 'view' | 'delete' | 'edit';
+    disableDrag?: boolean;
     onUpdate: (c: Card) => void;
     onDelete: (id: string) => void;
 }) {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
         id: card.id,
-        disabled: mode !== 'view',
+        disabled: mode !== 'view' || !!disableDrag,
     });
 
     const style = {
@@ -42,7 +44,7 @@ function SortableCard({ card, mode, onUpdate, onDelete }: {
     };
 
     return (
-        <div ref={setNodeRef} style={style} className={mode === 'view' ? 'cursor-grab active:cursor-grabbing' : ''} {...attributes} {...listeners}>
+        <div ref={setNodeRef} style={style} className={mode === 'view' && !disableDrag ? 'cursor-grab active:cursor-grabbing' : ''} {...attributes} {...listeners}>
             <CardItem
                 card={card}
                 onUpdate={onUpdate}
@@ -53,7 +55,7 @@ function SortableCard({ card, mode, onUpdate, onDelete }: {
     );
 }
 
-export default function CardGrid({ initialCards, mode, setCards }: CardGridProps) {
+export default function CardGrid({ initialCards, mode, setCards, disableDrag }: CardGridProps) {
     const [cards, setCardsState] = useState(initialCards);
 
     useEffect(() => {
@@ -110,6 +112,7 @@ export default function CardGrid({ initialCards, mode, setCards }: CardGridProps
                             key={card.id}
                             card={card}
                             mode={mode}
+                            disableDrag={disableDrag}
                             onUpdate={updateCard}
                             onDelete={deleteCard}
                         />
