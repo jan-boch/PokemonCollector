@@ -116,7 +116,7 @@ export default function App({ Component, pageProps }: AppProps) {
         <div className="min-h-screen bg-slate-50">
             <header className="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm">
                 <div className="container mx-auto px-4 py-3 flex justify-between items-center gap-4">
-                    <Link href="/" className="flex items-center gap-2.5 shrink-0" title="Go to collection">
+                    <Link href="/" className="flex items-center gap-2 shrink-0" title="Go to collection">
                         <svg width="28" height="28" viewBox="0 0 28 28" fill="none" className="shrink-0">
                             <path d="M1.5 14a12.5 12.5 0 0 1 25 0" fill="#ef4444" />
                             <path d="M1.5 14a12.5 12.5 0 0 0 25 0" fill="white" />
@@ -125,19 +125,20 @@ export default function App({ Component, pageProps }: AppProps) {
                             <circle cx="14" cy="14" r="4" fill="white" stroke="#1f2937" strokeWidth="1.5" />
                             <circle cx="14" cy="14" r="1.8" fill="#1f2937" />
                         </svg>
-                        <span className="text-lg font-bold text-gray-900">
+                        <span className="hidden sm:inline text-lg font-bold text-gray-900">
                             Pokémon Tracker
                         </span>
                     </Link>
 
-                    <nav className="flex items-center gap-2">
+                    <nav className="flex items-center gap-1.5 sm:gap-2">
                         {user ? (
                             <>
                                 <button
                                     onClick={() => router.push('/add')}
-                                    className="px-4 py-2 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold transition-colors shadow-sm"
+                                    className="px-3 sm:px-4 py-2 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold transition-colors shadow-sm"
                                 >
-                                    + Add Card
+                                    <span className="sm:hidden">+</span>
+                                    <span className="hidden sm:inline">+ Add Card</span>
                                 </button>
 
                                 <div className="flex rounded-full border border-gray-200 divide-x divide-gray-200 overflow-hidden">
@@ -165,15 +166,23 @@ export default function App({ Component, pageProps }: AppProps) {
 
                                 <button
                                     onClick={() => router.push('/lists')}
-                                    className="px-3 py-1.5 text-sm font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-full transition-colors"
+                                    className="p-1.5 sm:px-3 sm:py-1.5 text-sm font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-full transition-colors"
+                                    title="Lists"
                                 >
-                                    Lists
+                                    <svg className="w-4 h-4 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                                    </svg>
+                                    <span className="hidden sm:inline">Lists</span>
                                 </button>
                                 <button
                                     onClick={logout}
-                                    className="px-3 py-1.5 text-sm font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-full transition-colors"
+                                    className="p-1.5 sm:px-3 sm:py-1.5 text-sm font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-full transition-colors"
+                                    title="Logout"
                                 >
-                                    Logout
+                                    <svg className="w-4 h-4 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                    </svg>
+                                    <span className="hidden sm:inline">Logout</span>
                                 </button>
                             </>
                         ) : (
