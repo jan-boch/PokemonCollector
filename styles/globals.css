@@ -3,7 +3,9 @@
 @tailwind utilities;
 
 html, body {
-    overflow-x: hidden;
+    /* `clip` prevents horizontal scroll on mobile without creating a scroll
+       container, which `hidden` does — that would break the sticky header. */
+    overflow-x: clip;
     max-width: 100%;
 }
 
