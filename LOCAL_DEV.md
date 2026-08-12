@@ -38,9 +38,22 @@ make run
 
 The app is now at `http://localhost:3000` and talks to the local Supabase at `http://127.0.0.1:54321`.
 
+## Google login
+
+Sign-in uses Google OAuth via Supabase. For local development the Supabase CLI needs
+Google credentials in your shell environment **before** `make db-start`:
+
+```
+SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID=...apps.googleusercontent.com
+SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET=...
+```
+
+The Google OAuth client must list `http://127.0.0.1:54321/auth/v1/callback` as an
+authorized redirect URI (see the setup notes in the README / Google Cloud Console).
+
 ## Emails
 
-Emails (magic links, confirmations) are caught locally by Mailpit — they never reach a real inbox.
+Emails (confirmations, etc.) are caught locally by Mailpit — they never reach a real inbox.
 
 Open the local email inbox:
 ```

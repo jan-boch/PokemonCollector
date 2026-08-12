@@ -80,6 +80,16 @@ export default function Home({ user, mode, activeList, lists, listsLoading }: { 
         return () => { isMounted = false; };
     }, [user?.id, activeList, lists, listsLoading]);
 
+    // Restore the scroll position saved when the user left to edit a card
+    useEffect(() => {
+        if (loading) return;
+        const savedScrollY = sessionStorage.getItem('collectionScrollY');
+        if (savedScrollY) {
+            sessionStorage.removeItem('collectionScrollY');
+            window.scrollTo(0, Number(savedScrollY));
+        }
+    }, [loading]);
+
     if (!user) {
         return (
             <div className="flex flex-col items-center justify-center py-16 px-4 text-center">

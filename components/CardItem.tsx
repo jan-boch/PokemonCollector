@@ -91,6 +91,7 @@ export default function CardItem({ card, onUpdate, mode, onDelete }: CardItemPro
             {mode === 'edit' && (
                 <Link
                     href={`/update/${card.id}`}
+                    onClick={() => sessionStorage.setItem('collectionScrollY', String(window.scrollY))}
                     className="absolute top-2 right-2 z-10 w-7 h-7 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full flex items-center justify-center transition-colors shadow"
                     title={`Edit ${card.name}`}
                 >
