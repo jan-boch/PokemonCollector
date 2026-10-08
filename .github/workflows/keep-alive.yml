@@ -35,8 +35,10 @@ jobs:
             echo "BLOG_SUPABASE_URL not set, skipping"
             exit 0
           fi
+          # Root /rest/v1/ requires a secret key on new-API-key projects,
+          # so query a real table instead (also guarantees DB activity).
           code=$(curl -s -o /dev/null -w "%{http_code}" \
-            "$URL/rest/v1/" \
+            "$URL/rest/v1/blog_posts?select=id&limit=1" \
             -H "apikey: $KEY" \
             -H "Authorization: Bearer $KEY")
           echo "Blog Supabase: HTTP $code"
