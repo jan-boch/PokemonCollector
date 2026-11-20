@@ -1,32 +1,51 @@
 name: Keep free-tier services alive
 
-# Supabase free tier pauses projects after ~7 days without API activity.
-# This workflow makes a real database query every 3 days so both the
-# Pokemon tracker DB and the blog DB stay active.
+# Supabase free tier pauses projects that show low activity over a 7-day
+# period. Per Supabase docs, "a few requests to the database each day" is
+# what keeps a project active - one request every 3 days was NOT enough
+# (the tracker project got paused twice with that schedule).
+# This workflow therefore runs 4x a day and makes several real database
+# queries per run against both the Pokemon tracker DB and the blog DB.
 
 on:
   schedule:
-    # Every 3rd day at 08:00 UTC (well under Supabase's 7-day pause window)
-    - cron: '0 8 */3 * *'
+    # 4x daily, off the top of the hour (where GitHub's scheduler is most
+    # congested and runs get delayed or dropped)
+    - cron: '17 2,8,14,20 * * *'
   workflow_dispatch: # allows manual run from the Actions tab
+
+env:
+  # Retry transient failures (DNS hiccups, connection resets, 5xx).
+  # --retry-all-errors is needed because curl does not treat
+  # "could not resolve host" (exit 6) as retryable by default.
+  # NOTE: a persistent exit 6 means the project is PAUSED (Supabase removes
+  # the hostname of paused projects) - restore it in the dashboard.
+  CURL_RETRY: --retry 3 --retry-delay 10 --retry-all-errors --connect-timeout 20
+  REQUESTS_PER_RUN: 3
 
 jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping Pokemon tracker Supabase (real DB query)
+      - name: Ping Pokemon tracker Supabase (real DB queries)
         env:
           URL: ${{ secrets.SUPABASE_URL }}
           KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
-          code=$(curl -s -o /dev/null -w "%{http_code}" \
-            "$URL/rest/v1/cards?select=id&limit=1" \
-            -H "apikey: $KEY" \
-            -H "Authorization: Bearer $KEY")
-          echo "Pokemon tracker Supabase: HTTP $code"
-          test "$code" = "200"
+          for i in $(seq "$REQUESTS_PER_RUN"); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" $CURL_RETRY --max-time 30 \
+              "$URL/rest/v1/cards?select=id&limit=1" \
+              -H "apikey: $KEY" \
+              -H "Authorization: Bearer $KEY") || echo "curl exited with $? (6 = host not found => project is probably paused)"
+            echo "Pokemon tracker Supabase, request $i: HTTP $code"
+            test "$code" = "200"
+            sleep 2
+          done
 
+      # !cancelled() => each ping runs even if an earlier one failed, so one
+      # service being down never causes the others to miss their ping.
       - name: Ping blog Supabase (skipped if secrets not set)
+        if: ${{ !cancelled() }}
         env:
           URL: ${{ secrets.BLOG_SUPABASE_URL }}
           KEY: ${{ secrets.BLOG_SUPABASE_ANON_KEY }}
@@ -37,14 +56,18 @@ jobs:
           fi
           # Root /rest/v1/ requires a secret key on new-API-key projects,
           # so query a real table instead (also guarantees DB activity).
-          code=$(curl -s -o /dev/null -w "%{http_code}" \
-            "$URL/rest/v1/blog_posts?select=id&limit=1" \
-            -H "apikey: $KEY" \
-            -H "Authorization: Bearer $KEY")
-          echo "Blog Supabase: HTTP $code"
-          test "$code" = "200"
+          for i in $(seq "$REQUESTS_PER_RUN"); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" $CURL_RETRY --max-time 30 \
+              "$URL/rest/v1/blog_posts?select=id&limit=1" \
+              -H "apikey: $KEY" \
+              -H "Authorization: Bearer $KEY") || echo "curl exited with $? (6 = host not found => project is probably paused)"
+            echo "Blog Supabase, request $i: HTTP $code"
+            test "$code" = "200"
+            sleep 2
+          done
 
       - name: Wake up blog on Render (skipped if secret not set)
+        if: ${{ !cancelled() }}
         env:
           URL: ${{ secrets.BLOG_RENDER_URL }}
         run: |
@@ -53,6 +76,6 @@ jobs:
             exit 0
           fi
           # Render cold start can take ~1 minute, so allow a long timeout
-          code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 120 "$URL")
+          code=$(curl -s -o /dev/null -w "%{http_code}" $CURL_RETRY --max-time 120 "$URL") || echo "curl exited with $?"
           echo "Blog on Render: HTTP $code"
           test "$code" = "200"
